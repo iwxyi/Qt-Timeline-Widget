@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->listWidget->addItem("2020.3.13", "这是文本");
 }
 
 MainWindow::~MainWindow()

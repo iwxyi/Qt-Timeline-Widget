@@ -17,10 +17,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    timebucket.cpp \
+    timelinetextlabel.cpp \
+    timelinetimelabel.cpp \
+    timelinewidget.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.h \
+    timebucket.h \
+    timelinetextlabel.h \
+    timelinetimelabel.h \
+    timelinewidget.h
 
 FORMS += \
     mainwindow.ui
