@@ -81,17 +81,17 @@ void TimeBucket::setTimeLabelWidth(int w)
  */
 QSize TimeBucket::getSuitableSize()
 {
-    int sw = TIMELINE_BUBBLES_SPACING + time_widget->width();
+    int sw = horizone_spacing + time_widget->width();
     int sh = 0;
     for (int i = 0; i < text_widgets.size(); ++i)
     {
         if (sh < text_widgets.at(i)->height())
             sh = text_widgets.at(i)->height();
-        sw += TIMELINE_BUBBLES_SPACING + text_widgets.at(i)->width();
+        sw += horizone_spacing + text_widgets.at(i)->width();
     }
-    sw += hlayout->margin() * 2;
+    sw += hlayout->margin() * 2 + hlayout->spacing() * text_widgets.size();
     sh += hlayout->margin() * 2;
-    return QSize(sw, sh);
+    return QSize(sw, sh+vertical_spacing);
 }
 
 void TimeBucket::paintEvent(QPaintEvent *event)

@@ -8,8 +8,6 @@
 #include "timelinetimelabel.h"
 #include "timelinetextlabel.h"
 
-#define TIMELINE_BUBBLES_SPACING 30
-
 class TimeBucket : public QWidget
 {
     Q_OBJECT
@@ -43,6 +41,9 @@ private:
     TimelineTimeLabel* time_widget; // 时间点的线
     QList<TimelineTextLabel*> text_widgets; // 这个时间点的text控件列表
     QList<QWidget*> lines; // 线，0:time左边，1~..为控件左边（已废弃，使用 paintEvent 重绘线条）
+
+    int horizone_spacing = 30;
+    int vertical_spacing = 30;
 };
 
 #endif // TIMEBUCKET_H

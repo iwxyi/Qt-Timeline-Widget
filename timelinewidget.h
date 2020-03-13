@@ -22,6 +22,7 @@ private:
 signals:
 
 public slots:
+    void updateUI();
 
 private:
     QList<TimeBucket*> buckets;

@@ -21,8 +21,9 @@ void TimelineWidget::addItem(QString time, QStringList texts)
     // 设置item的尺寸
     connect(bucket, &TimeBucket::signalSizeHintChanged, this, [=](QSize size){
         item->setSizeHint(size);
-        qDebug() << "set item size" << size;
     });
+
+    updateUI();
 }
 
 TimeBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
@@ -31,4 +32,11 @@ TimeBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
     bucket->setTime(time);
     bucket->setText(texts);
     return bucket;
+}
+
+void TimelineWidget::updateUI()
+{
+    QString style = "#TimelineTimeLabel { background:white; border: 1px solid orange; border-radius: 5px; padding: 10px; }"
+            "#TimelineTextLabel { background:white; border: 1px solid blue; border-radius: 5px; padding:10px; }";
+    setStyleSheet(style);
 }
