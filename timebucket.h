@@ -4,8 +4,11 @@
 #include <QObject>
 #include <QWidget>
 #include <QHBoxLayout>
+#include <QDebug>
 #include "timelinetimelabel.h"
 #include "timelinetextlabel.h"
+
+#define TIMELINE_BUBBLES_SPACING 30
 
 class TimeBucket : public QWidget
 {
@@ -19,17 +22,19 @@ public:
     void setText(QString text);
     void setText(QStringList texts);
 
-    void addTextWidget(QString text = "");
-
     void clearText();
+
+    void setTimeLabelWidth(int w);
+    QSize getSuitableSize();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
 
 private:
-    void addOneLabel(QString text);
+    void addTextWidget(QString text = "");
 
 signals:
+    void signalSizeHintChanged(QSize size);
 
 public slots:
 
