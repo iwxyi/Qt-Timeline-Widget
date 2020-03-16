@@ -19,6 +19,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     timebucket.cpp \
+    timelineleadingdot.cpp \
     timelinetextlabel.cpp \
     timelinetimelabel.cpp \
     timelinewidget.cpp
@@ -26,6 +27,7 @@ SOURCES += \
 HEADERS += \
     mainwindow.h \
     timebucket.h \
+    timelineleadingdot.h \
     timelinetextlabel.h \
     timelinetimelabel.h \
     timelinewidget.h

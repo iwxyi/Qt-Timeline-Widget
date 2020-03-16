@@ -8,8 +8,16 @@ TimeBucket::TimeBucket(QWidget *parent) : QWidget(parent)
 void TimeBucket::initView()
 {
     hlayout = new QHBoxLayout(this);
+    leading_dot = new TimelineLeadingDot(this);
     time_widget = new TimelineTimeLabel(this);
 
+    leading_dot->setRadius(5);
+    leading_dot->setColor(Qt::blue);
+    leading_dot->show();
+
+    hlayout->addSpacing(padding_left);
+    hlayout->addWidget(leading_dot);
+    hlayout->addSpacing(leading_dot_radius*2 + leading_padding);
     hlayout->addWidget(time_widget);
 
     setLayout(hlayout);
@@ -97,6 +105,9 @@ QSize TimeBucket::getSuitableSize()
 void TimeBucket::paintEvent(QPaintEvent *event)
 {
     QWidget::paintEvent(event);
+
+    // 画时间轴的线
+
 
     // 每个控件之前画线条
 }
