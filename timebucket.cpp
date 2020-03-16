@@ -9,15 +9,15 @@ void TimeBucket::initView()
 {
     hlayout = new QHBoxLayout(this);
     leading_dot = new TimelineLeadingDot(this);
+    time_spacer = new QSpacerItem(dot_time_spacing, 0);
     time_widget = new TimelineTimeLabel(this);
 
     leading_dot->setRadius(5);
     leading_dot->setColor(Qt::blue);
-    leading_dot->show();
 
     hlayout->addSpacing(padding_left);
     hlayout->addWidget(leading_dot);
-    hlayout->addSpacing(leading_dot_radius*2 + leading_padding);
+    hlayout->addSpacerItem(time_spacer);
     hlayout->addWidget(time_widget);
 
     setLayout(hlayout);
@@ -68,6 +68,11 @@ void TimeBucket::addTextWidget(QString text)
     TimelineTextLabel* label = new TimelineTextLabel(this);
     label->setText(text);
     text_widgets.append(label);
+
+    QSpacerItem* spacer = new QSpacerItem(horizone_spacing, 0);
+    text_spacers.append(spacer);
+
+    hlayout->addSpacerItem(spacer);
     hlayout->addWidget(label);
 }
 
