@@ -3,6 +3,9 @@
 TimelineTextLabel::TimelineTextLabel(QWidget *parent) : QLabel(parent)
 {
     setObjectName("TimelineTextLabel");
+
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 }
 
 void TimelineTextLabel::mousePressEvent(QMouseEvent *event)
@@ -22,4 +25,9 @@ void TimelineTextLabel::mouseReleaseEvent(QMouseEvent *event)
         }
     }
     QLabel::mouseReleaseEvent(event);
+}
+
+void TimelineTextLabel::slotMenuShowed(const QPoint &pos)
+{
+
 }

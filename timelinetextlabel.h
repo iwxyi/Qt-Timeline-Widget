@@ -5,6 +5,8 @@
 #include <QApplication>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QMenu>
+#include <QAction>
 
 class TimelineTextLabel : public QLabel
 {
@@ -20,6 +22,7 @@ signals:
     void signalClicked();
 
 public slots:
+    void slotMenuShowed(const QPoint &pos);
 
 private:
     QPoint press_pos;

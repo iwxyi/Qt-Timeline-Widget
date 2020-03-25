@@ -31,7 +31,7 @@ QListWidgetItem *TimelineWidget::insertItem(QString time, QStringList texts, int
         QListWidget::insertItem(index, item);
     }
 
-    bucket->setVerticalIndex(count()); // 已经添加了，下标索引要-1
+    bucket->setVerticalIndex(count()-1); // 已经添加了，下标索引要-1
     setItemWidget(item, bucket);
     item->setSizeHint(bucket->getSuitableSize());
 
