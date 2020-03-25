@@ -16,6 +16,7 @@ public:
     TimeBucket(QWidget *parent = nullptr);
     void initView();
 
+    void setVerticalIndex(int index);
     void setTime(QString time);
     void setText(int index, QString text);
     void setText(QString text);
@@ -44,6 +45,8 @@ private:
     QList<TimelineTextLabel*> text_widgets; // 这个时间点的text控件列表
     QSpacerItem* time_spacer; // 时间左边的space
     QList<QSpacerItem*> text_spacers; // Text控件左边的空白
+
+    int vertical_index; // 在整个时间轴里面的下标
 
     int padding_left = 10; // 最左边开始的位置
     int leading_dot_radius = 5; // 开头小圆点的半径

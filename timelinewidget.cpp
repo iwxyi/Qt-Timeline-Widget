@@ -15,6 +15,7 @@ void TimelineWidget::addItem(QString time, QStringList texts)
     QListWidgetItem* item = new QListWidgetItem(this);
     TimeBucket* bucket = createItemWidget(time, texts);
     buckets.append(bucket);
+    bucket->setVerticalIndex(count()-1); // 已经添加了，下标索引要-1
     setItemWidget(item, bucket);
     item->setSizeHint(bucket->getSuitableSize());
 

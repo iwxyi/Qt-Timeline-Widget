@@ -24,6 +24,11 @@ void TimeBucket::initView()
     hlayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 }
 
+void TimeBucket::setVerticalIndex(int index)
+{
+    vertical_index = index;
+}
+
 void TimeBucket::setTime(QString time)
 {
     time_widget->setText(time);
@@ -128,5 +133,15 @@ void TimeBucket::paintEvent(QPaintEvent *event)
             left = time_widget->geometry().right();
         right = text_widgets.at(i)->geometry().left();
         painter.drawLine(QPoint(left, y), QPoint(right, y));
+    }
+
+    // 画和下一个连接的线条
+    if (vertical_index)
+    {
+        painter.drawLine(QPoint(leading_dot->geometry().center().x(), 0), QPoint(leading_dot->geometry().center().x(), height()));
+    }
+    else // 第一行
+    {
+        painter.drawLine(leading_dot->geometry().center(), QPoint(leading_dot->geometry().center().x(), height()));
     }
 }
