@@ -6,17 +6,32 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QListWidget(parent)
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 }
 
-void TimelineWidget::addItem(QString time, QString text)
+QListWidgetItem *TimelineWidget::addItem(QString time, QString text)
 {
-    addItem(time, QStringList{text});
+    return addItem(time, QStringList{text});
 }
 
-void TimelineWidget::addItem(QString time, QStringList texts)
+QListWidgetItem *TimelineWidget::addItem(QString time, QStringList texts)
 {
-    QListWidgetItem* item = new QListWidgetItem(this);
+    return insertItem(time, texts, -1);
+}
+
+QListWidgetItem *TimelineWidget::insertItem(QString time, QStringList texts, int index)
+{
+    QListWidgetItem* item = new QListWidgetItem();
     TimeBucket* bucket = createItemWidget(time, texts);
-    buckets.append(bucket);
-    bucket->setVerticalIndex(count()-1); // 已经添加了，下标索引要-1
+    if (index < 0 || index >= count()) // 添加到末尾
+    {
+        buckets.append(bucket);
+        QListWidget::addItem(item);
+    }
+    else // 插入到中间
+    {
+        buckets.insert(index, bucket);
+        QListWidget::insertItem(index, item);
+    }
+
+    bucket->setVerticalIndex(count()); // 已经添加了，下标索引要-1
     setItemWidget(item, bucket);
     item->setSizeHint(bucket->getSuitableSize());
 
@@ -30,6 +45,16 @@ void TimelineWidget::addItem(QString time, QStringList texts)
     connect(bucket, SIGNAL(signalTextWidgetClicked(TimelineTextLabel*)), this, SLOT(slotTextWidgetClicked(TimelineTextLabel*)));
 
     updateUI();
+    return item;
+}
+
+void TimelineWidget::removeItem(int index)
+{
+    if (index < 0 || index >= count())
+        return ;
+
+    QListWidget::takeItem(index);
+    buckets.takeAt(index)->deleteLater();
 }
 
 TimeBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
@@ -98,17 +123,26 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
 
 void TimelineWidget::actionInsertAbove()
 {
-    int index = currentIndex().row();
+    if (!currentIndex().isValid())
+        return ;
+    int index = currentRow();
+    setCurrentItem(insertItem("时间节点", QStringList{""}, index));
 }
 
 void TimelineWidget::actionInsertUnder()
 {
-
+    if (!currentIndex().isValid())
+        return ;
+    int index = currentRow();
+    setCurrentItem(insertItem("时间节点", QStringList{""}, index+1));
 }
 
 void TimelineWidget::actionDeleteLine()
 {
-
+    if (!currentIndex().isValid())
+        return ;
+    int index = currentRow();
+    removeItem(index);
 }
 
 void TimelineWidget::actionCopyText()

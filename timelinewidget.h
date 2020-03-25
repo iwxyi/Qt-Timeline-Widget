@@ -16,8 +16,10 @@ class TimelineWidget : public QListWidget
 public:
     TimelineWidget(QWidget *parent = nullptr);
 
-    void addItem(QString time, QString text);
-    void addItem(QString time, QStringList texts);
+    QListWidgetItem* addItem(QString time, QString text);
+    QListWidgetItem* addItem(QString time, QStringList texts);
+    QListWidgetItem* insertItem(QString time, QStringList texts, int index = -1);
+    void removeItem(int index);
 
 private:
     TimeBucket *createItemWidget(QString time, QStringList texts);
