@@ -48,10 +48,20 @@ void TimelineWidget::updateUI()
 
 void TimelineWidget::slotTimeWidgetClicked(TimelineTimeLabel *label)
 {
-    qDebug() << "时间被单击";
+    QString text = label->text();
+    bool ok;
+    text = QInputDialog::getText(this, "修改时间", "请输入新的时间", QLineEdit::Normal, text, &ok);
+    if (!ok)
+        return ;
+    label->setText(text);
 }
 
 void TimelineWidget::slotTextWidgetClicked(TimelineTextLabel *label)
 {
-    qDebug() << "文字被单击";
+    QString text = label->text();
+    bool ok;
+    text = QInputDialog::getText(this, "修改内容", "请输入新的内容", QLineEdit::Normal, text, &ok);
+    if (!ok)
+        return ;
+    label->setText(text);
 }
