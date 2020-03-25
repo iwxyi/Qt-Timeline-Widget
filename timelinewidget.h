@@ -6,6 +6,8 @@
 #include <QListWidgetItem>
 #include <QDebug>
 #include <QInputDialog>
+#include <QMenu>
+#include <QAction>
 #include "timebucket.h"
 
 class TimelineWidget : public QListWidget
@@ -26,6 +28,12 @@ public slots:
     void updateUI();
     void slotTimeWidgetClicked(TimelineTimeLabel* label);
     void slotTextWidgetClicked(TimelineTextLabel* label);
+    void slotMenuShowed(const QPoint& pos);
+
+    void actionInsertAbove();
+    void actionInsertUnder();
+    void actionDeleteLine();
+    void actionCopyText();
 
 private:
     QList<TimeBucket*> buckets;

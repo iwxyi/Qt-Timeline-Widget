@@ -2,7 +2,8 @@
 
 TimelineWidget::TimelineWidget(QWidget *parent) : QListWidget(parent)
 {
-
+    setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 }
 
 void TimelineWidget::addItem(QString time, QString text)
@@ -64,4 +65,53 @@ void TimelineWidget::slotTextWidgetClicked(TimelineTextLabel *label)
     if (!ok)
         return ;
     label->setText(text);
+}
+
+void TimelineWidget::slotMenuShowed(const QPoint &pos)
+{
+    QMenu* menu = new QMenu("菜单", this);
+    QAction* insert_above_action = new QAction("上方插入行", this);
+    QAction* insert_under_action = new QAction("下方插入行", this);
+    QAction* delete_line_action = new QAction("删除行", this);
+    QAction* copy_text_action = new QAction("复制文字", this);
+    menu->addAction(insert_above_action);
+    menu->addAction(insert_under_action);
+    menu->addAction(delete_line_action);
+    menu->addAction(copy_text_action);
+
+    if (!currentIndex().isValid())
+    {
+        insert_above_action->setEnabled(false);
+        insert_under_action->setEnabled(false);
+        delete_line_action->setEnabled(false);
+        copy_text_action->setEnabled(false);
+    }
+
+    // 设置事件
+    connect(insert_above_action, SIGNAL(triggered()), this, SLOT(actionInsertAbove()));
+    connect(insert_under_action, SIGNAL(triggered()), this, SLOT(actionInsertUnder()));
+    connect(delete_line_action, SIGNAL(triggered()), this, SLOT(actionDeleteLine()));
+    connect(copy_text_action, SIGNAL(triggered()), this, SLOT(actionCopyText()));
+
+    menu->exec(QCursor::pos());
+}
+
+void TimelineWidget::actionInsertAbove()
+{
+    int index = currentIndex().row();
+}
+
+void TimelineWidget::actionInsertUnder()
+{
+
+}
+
+void TimelineWidget::actionDeleteLine()
+{
+
+}
+
+void TimelineWidget::actionCopyText()
+{
+
 }
