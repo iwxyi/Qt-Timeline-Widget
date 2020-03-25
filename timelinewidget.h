@@ -5,6 +5,7 @@
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QDebug>
+#include <QInputDialog>
 #include "timebucket.h"
 
 class TimelineWidget : public QListWidget
@@ -23,6 +24,8 @@ signals:
 
 public slots:
     void updateUI();
+    void slotTimeWidgetClicked(TimelineTimeLabel* label);
+    void slotTextWidgetClicked(TimelineTextLabel* label);
 
 private:
     QList<TimeBucket*> buckets;

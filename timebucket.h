@@ -35,8 +35,11 @@ private:
 
 signals:
     void signalSizeHintChanged(QSize size);
+    void signalTimeWidgetClicked(TimelineTimeLabel* label);
+    void signalTextWidgetClicked(TimelineTextLabel* label);
 
 public slots:
+
 
 private:
     QHBoxLayout* hlayout;

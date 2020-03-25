@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    srand(time(0));
 
     for (int i = 0; i < 20; i++)
     {

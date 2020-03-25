@@ -24,6 +24,10 @@ void TimelineWidget::addItem(QString time, QStringList texts)
         item->setSizeHint(size);
     });
 
+    // 连接事件信号
+    connect(bucket, SIGNAL(signalTimeWidgetClicked(TimelineTimeLabel*)), this, SLOT(slotTimeWidgetClicked(TimelineTimeLabel*)));
+    connect(bucket, SIGNAL(signalTextWidgetClicked(TimelineTextLabel*)), this, SLOT(slotTextWidgetClicked(TimelineTextLabel*)));
+
     updateUI();
 }
 
@@ -40,4 +44,14 @@ void TimelineWidget::updateUI()
     QString style = "#TimelineTimeLabel { background:white; border: 1px solid orange; border-radius: 5px; padding: 10px; }"
             "#TimelineTextLabel { background:white; border: 1px solid blue; border-radius: 5px; padding:10px; }";
     setStyleSheet(style);
+}
+
+void TimelineWidget::slotTimeWidgetClicked(TimelineTimeLabel *label)
+{
+    qDebug() << "时间被单击";
+}
+
+void TimelineWidget::slotTextWidgetClicked(TimelineTextLabel *label)
+{
+    qDebug() << "文字被单击";
 }

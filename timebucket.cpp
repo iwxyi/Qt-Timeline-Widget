@@ -22,6 +22,10 @@ void TimeBucket::initView()
 
     setLayout(hlayout);
     hlayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+    connect(time_widget, &TimelineTimeLabel::signalClicked, this, [=] {
+        emit signalTimeWidgetClicked(time_widget);
+    });
 }
 
 void TimeBucket::setVerticalIndex(int index)
@@ -79,6 +83,10 @@ void TimeBucket::addTextWidget(QString text)
 
     hlayout->addSpacerItem(spacer);
     hlayout->addWidget(label);
+
+    connect(label, &TimelineTextLabel::signalClicked, this, [=] {
+        emit signalTextWidgetClicked(label);
+    });
 }
 
 void TimeBucket::clearText()
