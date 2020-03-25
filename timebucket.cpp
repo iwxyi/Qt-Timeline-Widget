@@ -110,9 +110,23 @@ QSize TimeBucket::getSuitableSize()
 void TimeBucket::paintEvent(QPaintEvent *event)
 {
     QWidget::paintEvent(event);
+    QPainter painter(this);
+    painter.setPen(QPen(QColor(0, 0, 200, 126)));
+    int y = leading_dot->geometry().center().y();
 
     // 画时间轴的线
-
+    int left = padding_left + leading_dot_radius*2;
+    int right = time_widget->geometry().left();
+    painter.drawLine(QPoint(left, y), QPoint(right, y));
 
     // 每个控件之前画线条
+    for (int i = 0; i < text_widgets.size(); ++i)
+    {
+        if (i)
+            left = text_widgets.at(i-1)->geometry().right();
+        else
+            left = time_widget->geometry().right();
+        right = text_widgets.at(i)->geometry().left();
+        painter.drawLine(QPoint(left, y), QPoint(right, y));
+    }
 }

@@ -7,8 +7,14 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    ui->listWidget->addItem("2020.3.13", "这是文本");
-    ui->listWidget->addItem("2020.3.13", QStringList{"这是文本1", "这是文本2", "这是文本3", "这是文本4"});
+    for (int i = 0; i < 20; i++)
+    {
+        QStringList sl;
+        int count = rand() % 8;
+        while (count--)
+            sl << ("文本"+QString::number(rand()%90000+10000));
+        ui->listWidget->addItem("2020.3.13", sl);
+    }
 }
 
 MainWindow::~MainWindow()
