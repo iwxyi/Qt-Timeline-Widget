@@ -8,6 +8,7 @@
 #include <QAction>
 #include <QMimeData>
 #include <QDrag>
+#include <QPropertyAnimation>
 #include "timelinebucket.h"
 
 class TimelineWidget : public QWidget
@@ -27,7 +28,8 @@ public:
     void setCurrentItem(int row, bool multi = false);
     void setCurrentItem(TimelineBucket* bucket, bool multi = false);
 
-    void adjustBucketsPositions(int start);
+    void adjustBucketsPositions(int start = -1);
+    void adjustBucketsPositionsWithAnimation(int start = 0, int end = -1);
 
 protected:
 

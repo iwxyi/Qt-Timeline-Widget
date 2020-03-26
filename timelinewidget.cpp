@@ -116,6 +116,31 @@ void TimelineWidget::adjustBucketsPositions(int start)
     }
 }
 
+/**
+ * 调整某一范围内 buckets 的位置
+ * 并且包含位置移动动画
+ */
+void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
+{
+    if (end == -1)
+        end = count();
+    else
+        end++;
+    int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
+    for (int i = start; i < end; i++)
+    {
+        TimelineBucket* bucket = buckets.at(i);
+        QPropertyAnimation* ani = new QPropertyAnimation(bucket, "pos");
+        ani->setStartValue(bucket->pos());
+        ani->setEndValue(QPoint(bucket->pos().x(), top));
+        ani->setDuration(300);
+        ani->setEasingCurve(QEasingCurve::OutQuart);
+        connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+        ani->start();
+        top += bucket->height();
+    }
+}
+
 TimelineBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
 {
     TimelineBucket* bucket = new TimelineBucket(this);
@@ -247,10 +272,16 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
     // 交换 bucket
     TimelineBucket* bucket = buckets.at(from_index);
     buckets.removeAt(from_index);
-    if (from_index < to_index)
-        to_index--;
-    buckets.insert(to_index, bucket);
-    adjustBucketsPositions(qMin(from_index, to_index));
+    if (from_index < to_index) // 下移
+    {
+        buckets.insert(to_index, bucket);
+    }
+    else // 上移
+    {
+        buckets.insert(to_index, bucket);
+    }
+//    adjustBucketsPositions(qMin(from_index, to_index));
+    adjustBucketsPositionsWithAnimation(qMin(from_index, to_index), qMax(from_index, to_index));
 }
 
 void TimelineWidget::actionInsertAbove()
