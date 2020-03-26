@@ -37,6 +37,7 @@ public slots:
     void slotTimeWidgetDoubleClicked(TimelineTimeLabel* label);
     void slotTextWidgetDoubleClicked(TimelineTextLabel* label);
     void slotMenuShowed(const QPoint& pos);
+    void slotDroppedAndMoved(TimelineBucket* from, TimelineBucket* to);
 
     void actionInsertAbove();
     void actionInsertUnder();

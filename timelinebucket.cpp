@@ -239,6 +239,11 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
             mime->setData(TIMELINE_BUCKET_MIME_KEY, QString::number(reinterpret_cast<int>(this)).toUtf8());
             QDrag* drag = new QDrag(this);
             drag->setMimeData(mime);
+            drag->setHotSpot(event->pos()); // 好像没什么用
+            QPixmap pixmap(size());
+            pixmap.fill(Qt::transparent);
+            render(&pixmap);
+            drag->setPixmap(pixmap);
             drag->exec(Qt::MoveAction);
             return event->accept();
         }
@@ -282,7 +287,8 @@ void TimelineBucket::dropEvent(QDropEvent *event)
     }
     else // 外部拖拽，交换顺序/移动数据
     {
-
+        TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
+        emit signalDroppedAndMoved(bucket);
     }
 
     QWidget::dropEvent(event);
@@ -291,7 +297,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
 bool TimelineBucket::processDropEvent(QDropEvent *event)
 {
     const QMimeData* mime = event->mimeData();
-    if (mime->hasFormat(TIMELINE_BUCKET_MIME_KEY))
+    if (mime->hasFormat(TIMELINE_BUCKET_MIME_KEY)) // 整行拖拽
     {
         TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
         if (bucket)
@@ -303,7 +309,7 @@ bool TimelineBucket::processDropEvent(QDropEvent *event)
         }
         return false;
     }
-    else if (mime->hasFormat("TIMELINE_TEXT") || mime->hasFormat("TIMELINE_TIME"))
+    else if (mime->hasFormat("TIMELINE_TEXT_WIDGET")) // 单个TextWidget拖拽
     {
 
     }

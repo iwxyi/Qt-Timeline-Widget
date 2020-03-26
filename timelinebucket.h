@@ -11,7 +11,7 @@
 #include "timelinetextlabel.h"
 #include "timelineleadingdot.h"
 
-#define TIMELINE_BUCKET_MIME_KEY "TIMELINE_BUCKET"
+#define TIMELINE_BUCKET_MIME_KEY "TIMELINE_BUCKET_WIDGET"
 
 class TimelineBucket : public QWidget
 {
@@ -54,6 +54,7 @@ signals:
     void signalTextWidgetClicked(TimelineTextLabel* label);
     void signalTimeWidgetDoubleClicked(TimelineTimeLabel* label);
     void signalTextWidgetDoubleClicked(TimelineTextLabel* label);
+    void signalDroppedAndMoved(TimelineBucket* bucket);
 
 public slots:
     void actionInsertLeft(TimelineTextLabel* label);

@@ -47,6 +47,11 @@ QListWidgetItem *TimelineWidget::insertItem(QString time, QStringList texts, int
     connect(bucket, SIGNAL(signalTimeWidgetDoubleClicked(TimelineTimeLabel*)), this, SLOT(slotTimeWidgetDoubleClicked(TimelineTimeLabel*)));
     connect(bucket, SIGNAL(signalTextWidgetDoubleClicked(TimelineTextLabel*)), this, SLOT(slotTextWidgetDoubleClicked(TimelineTextLabel*)));
 
+//    connect(bucket, SIGNAL(signalDroppedAndMoved(TimelineBucket*)), this, SLOT(slotDroppedAndMoved(TimelineBucket*)));
+    connect(bucket, &TimelineBucket::signalDroppedAndMoved, this, [=](TimelineBucket* from_bucket) {
+        slotDroppedAndMoved(from_bucket, bucket);
+    });
+
     updateUI();
     return item;
 }
@@ -132,6 +137,15 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     connect(copy_text_action, SIGNAL(triggered()), this, SLOT(actionCopyText()));
 
     menu->exec(QCursor::pos());
+}
+
+void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *to)
+{
+    int from_index = buckets.indexOf(from);
+    int to_index = buckets.indexOf(to);
+    if (from_index < 0 || to_index < 0)
+        return ;
+
 }
 
 void TimelineWidget::actionInsertAbove()

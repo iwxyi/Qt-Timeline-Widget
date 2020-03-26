@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
         int count = rand() % 8;
         while (count--)
             sl << ("文本"+QString::number(rand()%90000+10000));
-        ui->listWidget->addItem("2020.3.13", sl);
+        ui->listWidget->addItem("2020.3."+QString::number(i), sl);
     }
     ((QListWidget*)ui->listWidget)->addItem("aaaaaaaaaaa");
 
