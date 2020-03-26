@@ -271,6 +271,14 @@ void TimelineBucket::setSelected(bool select)
     this->selecting = select;
 }
 
+void TimelineBucket::showEvent(QShowEvent *event)
+{
+    QWidget::showEvent(event);
+
+    adjustWidgetsSize();
+    adjustWidgetsPositions();
+}
+
 void TimelineBucket::paintEvent(QPaintEvent *event)
 {
     QWidget::paintEvent(event);

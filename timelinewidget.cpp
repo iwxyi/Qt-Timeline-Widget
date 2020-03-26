@@ -127,7 +127,6 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     else
         end++;
     int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
-    qDebug() << "调整：" << start << end;
     for (int i = start; i < end; i++)
     {
         TimelineBucket* bucket = buckets.at(i);
@@ -280,10 +279,14 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
     if (from_index < to_index) // 下移
     {
         buckets.insert(to_index, bucket);
+        for (int i = from_index; i <= to_index; i++)
+            buckets.at(i)->setVerticalIndex(i);
     }
     else // 上移
     {
         buckets.insert(to_index, bucket);
+        for (int i = from_index; i >= to_index; i--)
+            buckets.at(i)->setVerticalIndex(i);
     }
 
     adjustBucketsPositionsWithAnimation(qMin(from_index, to_index));

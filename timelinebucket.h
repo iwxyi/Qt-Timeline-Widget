@@ -41,6 +41,7 @@ public:
     void setSelected(bool select);
 
 protected:
+    void showEvent(QShowEvent* event) override;
     void paintEvent(QPaintEvent *event) override;
     void enterEvent(QEvent *event) override;
     void leaveEvent(QEvent *event) override;
