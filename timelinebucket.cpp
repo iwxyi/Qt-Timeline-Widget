@@ -4,6 +4,8 @@ TimelineBucket::TimelineBucket(QWidget *parent) : QWidget(parent)
 {
     setAcceptDrops(true);
 
+    selecting = false;
+
     initView();
 }
 
@@ -55,7 +57,7 @@ void TimelineBucket::setText(int index, QString text)
     // 设置内容
     text_widgets.at(index)->setText(text);
 
-    emit signalSizeHintChanged(getSuitableSize());
+    adjustBucketSize();
 }
 
 void TimelineBucket::setText(QString text)
@@ -63,7 +65,7 @@ void TimelineBucket::setText(QString text)
     this->clearText();
     addTextWidget(text);
 
-    emit signalSizeHintChanged(getSuitableSize());
+    adjustBucketSize();
 }
 
 void TimelineBucket::setText(QStringList texts)
@@ -74,7 +76,7 @@ void TimelineBucket::setText(QStringList texts)
         addTextWidget(text);
     }
 
-    emit signalSizeHintChanged(getSuitableSize());
+    adjustBucketSize();
 }
 
 void TimelineBucket::addTextWidget(QString text)
@@ -147,6 +149,13 @@ void TimelineBucket::setTimeLabelWidth(int w)
     time_widget->setFixedWidth(w);
 }
 
+void TimelineBucket::adjustBucketSize()
+{
+    QSize size = getSuitableSize();
+    setMinimumSize(size);
+    emit signalSizeHintChanged(size);
+}
+
 /**
  * 根据里面的内容，获取对应合适的宽度和高度
  */
@@ -162,7 +171,18 @@ QSize TimelineBucket::getSuitableSize()
     }
     sw += hlayout->margin() * 2 + hlayout->spacing() * text_widgets.size();
     sh += hlayout->margin() * 2;
+
     return QSize(sw, sh+vertical_spacing);
+}
+
+bool TimelineBucket::isSelected()
+{
+    return selecting;
+}
+
+void TimelineBucket::setSelected(bool select)
+{
+    this->selecting = select;
 }
 
 void TimelineBucket::paintEvent(QPaintEvent *event)
@@ -221,6 +241,11 @@ void TimelineBucket::mousePressEvent(QMouseEvent *event)
 
 void TimelineBucket::mouseReleaseEvent(QMouseEvent *event)
 {
+    if ((press_pos-event->pos()).manhattanLength() < QApplication::startDragDistance())
+    {
+        emit signalBucketWidgetClicked();
+    }
+
     QWidget::mouseReleaseEvent(event);
 }
 

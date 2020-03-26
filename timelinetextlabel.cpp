@@ -29,7 +29,6 @@ void TimelineTextLabel::mouseReleaseEvent(QMouseEvent *event)
 
 void TimelineTextLabel::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    qDebug() << "doubleClicked" << event->button() << event->buttons();
     if (event->button() == Qt::LeftButton)
     {
         emit signalDoubleClicked();

@@ -29,7 +29,11 @@ public:
     void clearText();
 
     void setTimeLabelWidth(int w);
+    void adjustBucketSize();
     QSize getSuitableSize();
+
+    bool isSelected();
+    void setSelected(bool select);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -50,6 +54,7 @@ private:
 
 signals:
     void signalSizeHintChanged(QSize size);
+    void signalBucketWidgetClicked();
     void signalTimeWidgetClicked(TimelineTimeLabel* label);
     void signalTextWidgetClicked(TimelineTextLabel* label);
     void signalTimeWidgetDoubleClicked(TimelineTimeLabel* label);
@@ -75,9 +80,10 @@ private:
     int leading_dot_radius = 5; // 开头小圆点的半径
     int dot_time_spacing  = 30; // 时间和小圆点的距离
     int horizone_spacing = 30; // 每个text之间的间隔
-    int vertical_spacing = 30; // 竖向两个时间段的固定距离
+    int vertical_spacing = 20; // 竖向两个时间段的固定距离
 
     QPoint press_pos;
+    bool selecting;
 };
 
 #endif // TIMELINEBUCKET_H

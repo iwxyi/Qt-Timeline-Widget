@@ -16,23 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="TimelineWidget" name="listWidget"/>
-    </item>
-    <item>
-     <widget class="TestListWidget" name="listWidget_2">
-      <property name="dragEnabled">
-       <bool>true</bool>
-      </property>
-      <property name="dragDropOverwriteMode">
-       <bool>true</bool>
-      </property>
-      <property name="dragDropMode">
-       <enum>QAbstractItemView::DropOnly</enum>
-      </property>
-      <property name="defaultDropAction">
-       <enum>Qt::MoveAction</enum>
-      </property>
-     </widget>
+     <widget class="TimelineWidget" name="widget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -51,13 +35,9 @@
  <customwidgets>
   <customwidget>
    <class>TimelineWidget</class>
-   <extends>QListWidget</extends>
+   <extends>QWidget</extends>
    <header>timelinewidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>TestListWidget</class>
-   <extends>QListWidget</extends>
-   <header>testlistwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
