@@ -32,8 +32,8 @@ public:
     void setTimeLabelWidth(int w);
     void adjustBucketSize();
     QSize getSuitableSize();
-    void adjustTextsPositions(int start = 0);
-    void adjustTextsPositionsWithAnimation(int start = 0, int end = -1);
+    void adjustWidgetsPositions(int start = 0);
+    void adjustWidgetsPositionsWithAnimation(int start = 0, int end = -1);
 
     bool isSelected();
     void setSelected(bool select);
@@ -71,11 +71,8 @@ public slots:
     void actionMoveTextLabel(int from, int to);
 
 private:
-    QHBoxLayout* hlayout;
     TimelineLeadingDot* leading_dot; // 开头的小点
-    QSpacerItem* time_spacer; // 时间左边的space
     TimelineTimeLabel* time_widget; // 时间点的线
-    QList<QSpacerItem*> text_spacers; // Text控件左边的空白
     QList<TimelineTextLabel*> text_widgets; // 这个时间点的text控件列表
 
     int vertical_index; // 在整个时间轴里面的下标

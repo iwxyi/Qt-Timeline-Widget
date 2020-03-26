@@ -11,21 +11,13 @@ TimelineBucket::TimelineBucket(QWidget *parent) : QWidget(parent)
 
 void TimelineBucket::initView()
 {
-    hlayout = new QHBoxLayout(this);
     leading_dot = new TimelineLeadingDot(this);
-    time_spacer = new QSpacerItem(dot_time_spacing, 0);
     time_widget = new TimelineTimeLabel(this);
 
     leading_dot->setRadius(5);
     leading_dot->setColor(Qt::blue);
 
-    hlayout->addSpacing(padding_left);
-    hlayout->addWidget(leading_dot);
-    hlayout->addSpacerItem(time_spacer);
-    hlayout->addWidget(time_widget);
-
-    setLayout(hlayout);
-    hlayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    adjustWidgetsPositions();
 
     connect(time_widget, &TimelineTimeLabel::signalClicked, this, [=] {
         emit signalTimeWidgetClicked(time_widget);
@@ -45,6 +37,8 @@ void TimelineBucket::setTime(QString time)
     time_widget->setText(time);
     time_widget->adjustSize();
     time_widget->setScaledContents(true);
+
+    adjustWidgetsPositions();
 }
 
 void TimelineBucket::setText(int index, QString text)
@@ -57,7 +51,7 @@ void TimelineBucket::setText(int index, QString text)
     // 设置内容
     text_widgets.at(index)->setText(text);
 
-    adjustBucketSize();
+    adjustWidgetsPositions();
 }
 
 void TimelineBucket::setText(QString text)
@@ -65,7 +59,7 @@ void TimelineBucket::setText(QString text)
     this->clearText();
     addTextWidget(text);
 
-    adjustBucketSize();
+    adjustWidgetsPositions();
 }
 
 void TimelineBucket::setText(QStringList texts)
@@ -76,7 +70,7 @@ void TimelineBucket::setText(QStringList texts)
         addTextWidget(text);
     }
 
-    adjustBucketSize();
+    adjustWidgetsPositions();
 }
 
 void TimelineBucket::addTextWidget(QString text)
@@ -84,12 +78,6 @@ void TimelineBucket::addTextWidget(QString text)
     TimelineTextLabel* label = new TimelineTextLabel(this);
     label->setText(text);
     text_widgets.append(label);
-
-    QSpacerItem* spacer = new QSpacerItem(horizone_spacing, 0);
-    text_spacers.append(spacer);
-
-    hlayout->addSpacerItem(spacer);
-    hlayout->addWidget(label);
 
     connect(label, &TimelineTextLabel::signalClicked, this, [=] {
         emit signalTextWidgetClicked(label);
@@ -108,11 +96,8 @@ void TimelineBucket::addTextWidget(QString text)
     });
     connect(label, &TimelineTextLabel::signalDraggedToOut, this, [=]{
         int index = text_widgets.indexOf(label);
-        hlayout->removeItem(text_spacers.at(index));
-        hlayout->removeWidget(label);
-        delete text_spacers.takeAt(index);
         text_widgets.removeAt(index);
-
+        adjustWidgetsPositionsWithAnimation(index);
     });
 }
 
@@ -182,34 +167,49 @@ QSize TimelineBucket::getSuitableSize()
             sh = text_widgets.at(i)->height();
         sw += horizone_spacing + text_widgets.at(i)->width();
     }
-    sw += hlayout->margin() * 2 + hlayout->spacing() * text_widgets.size();
-    sh += hlayout->margin() * 2;
-
-    return QSize(sw, sh+vertical_spacing);
+    sw += padding_left + leading_dot_radius*2 + dot_time_spacing + horizone_spacing * text_widgets.size();
+    sh += vertical_spacing;
+    return QSize(sw, sh);
 }
 
-void TimelineBucket::adjustTextsPositions(int start)
+void TimelineBucket::adjustWidgetsPositions(int start)
 {
-    int left = (start-1)>=0 ? text_spacers.at(start-1)->geometry().left() : time_widget->geometry().right()+1;
+    setMinimumSize(getSuitableSize());
+    int mid_y = height() / 2;
+    leading_dot->move(padding_left, mid_y-leading_dot_radius);
+    time_widget->move(leading_dot->geometry().right() + dot_time_spacing, mid_y - time_widget->height()/2);
+
+    int left = (start-1)>=0 ? text_widgets.at(start-1)->geometry().right() : time_widget->geometry().right();
     int end = text_widgets.size();
     for (int i = start; i < end; i++)
     {
-        // 自动调整的，无需手动干预
+        TimelineTextLabel* label = text_widgets.at(i);
+        left += horizone_spacing;
+        label->move(left, mid_y - label->height() / 2);
+        left += label->width();
     }
 }
 
-void TimelineBucket::adjustTextsPositionsWithAnimation(int start, int end)
+void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
 {
-    int left = (start-1)>=0 ? text_spacers.at(start-1)->geometry().left() : time_widget->geometry().right()+1;
+    setMinimumSize(getSuitableSize());
+    int mid_y = height() / 2;
+    leading_dot->move(padding_left, mid_y-leading_dot_radius);
+    time_widget->move(leading_dot->geometry().right() + dot_time_spacing, mid_y - time_widget->height()/2);
+
+    int left = (start-1)>=0 ? text_widgets.at(start-1)->geometry().right() : time_widget->geometry().right();
     if (end == -1)
         end = text_widgets.size();
     for (int i = start; i < end; i++)
     {
-        auto spacer = text_spacers.at(i);
-        auto widget = text_widgets.at(i);
-        QPropertyAnimation* ani = new QPropertyAnimation(widget, "pos");
-        ani->setStartValue(widget->pos());
-        ani->setEndValue(QPoint(left+spacer->geometry().width(), widget->pos().y()));
+        TimelineTextLabel* label = text_widgets.at(i);
+        left += horizone_spacing;
+        label->move(left, mid_y - label->height() / 2);
+        left += label->width();
+
+        QPropertyAnimation* ani = new QPropertyAnimation(label, "pos");
+        ani->setStartValue(label->pos());
+        ani->setEndValue(QPoint(left+horizone_spacing, label->pos().y()));
         ani->setDuration(300);
         ani->setEasingCurve(QEasingCurve::OutQuart);
         connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
@@ -368,50 +368,33 @@ void TimelineBucket::dropEvent(QDropEvent *event)
             QPoint pos = event->pos();
             for (int i = 0; i < text_widgets.size(); i++)
             {
-                if (text_widgets.at(i)->geometry().left() >= pos.x()) // 移到这个 label 的后面
+                if (text_widgets.at(i)->geometry().right() >= pos.x()) // 移到这个 label 的后面
                 {
                     to_index = i;
                     break;
                 }
             }
 
-            // 放下的位置的索引
-            int layout_index = 0;
-            if (to_index == text_widgets.size()) // 最后面
-                layout_index = hlayout->count();
-            else
-                layout_index = hlayout->indexOf(text_widgets.at(to_index)); // 获取前面空白的位置
-
             // 获取被拖拽的目标
             int from_index = text_widgets.indexOf(label);
             if (from_index == -1) // 外面拖进来的
             {
+                auto widget = new TimelineTextLabel(label, this);
+                widget->show();
                 emit label->signalDraggedToOut(); // 从父类那里删掉
-                label->setParent(this);
 
-                auto spacer = new QSpacerItem(horizone_spacing, 1);
-                text_spacers.insert(to_index, spacer);
-                text_widgets.insert(to_index, label);
-
-                hlayout->insertWidget(layout_index, label);
-                hlayout->insertItem(layout_index, spacer);
+                text_widgets.insert(to_index, widget);
             }
             else // 自己的，删掉旧的
             {
-                auto spacer = text_spacers.at(from_index);
                 auto widget = text_widgets.at(from_index);
 
-                hlayout->removeItem(spacer);
-                hlayout->removeWidget(widget);
-                text_spacers.removeAt(from_index);
                 text_widgets.removeAt(from_index);
 
-                text_spacers.insert(to_index, spacer);
                 text_widgets.insert(to_index, widget);
-
-                hlayout->insertWidget(layout_index, label);
-                hlayout->insertItem(layout_index, spacer);
             }
+
+            adjustWidgetsPositions();
         }
     }
 

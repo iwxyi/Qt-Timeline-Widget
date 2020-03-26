@@ -20,7 +20,7 @@ class TimelineTextLabel : public QLabel
     Q_OBJECT
 public:
     TimelineTextLabel(QWidget* parent = nullptr);
-    TimelineTextLabel(TimelineTextLabel*& another);
+    TimelineTextLabel(TimelineTextLabel*& another, QWidget* parent = nullptr);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;

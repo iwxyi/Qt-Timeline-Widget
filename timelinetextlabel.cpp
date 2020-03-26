@@ -8,7 +8,7 @@ TimelineTextLabel::TimelineTextLabel(QWidget *parent) : QLabel(parent)
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 }
 
-TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another)
+TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another, QWidget *parent) : TimelineTextLabel(parent)
 {
     setText(another->text());
 }
