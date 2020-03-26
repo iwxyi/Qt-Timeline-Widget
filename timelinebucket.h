@@ -1,5 +1,5 @@
-#ifndef TIMEBUCKET_H
-#define TIMEBUCKET_H
+#ifndef TIMELINEBUCKET_H
+#define TIMELINEBUCKET_H
 
 #include <QObject>
 #include <QWidget>
@@ -11,11 +11,13 @@
 #include "timelinetextlabel.h"
 #include "timelineleadingdot.h"
 
-class TimeBucket : public QWidget
+#define TIMELINE_BUCKET_MIME_KEY "TIMELINE_BUCKET"
+
+class TimelineBucket : public QWidget
 {
     Q_OBJECT
 public:
-    TimeBucket(QWidget *parent = nullptr);
+    TimelineBucket(QWidget *parent = nullptr);
     void initView();
 
     void setVerticalIndex(int index);
@@ -38,11 +40,13 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
 
 private:
     void addTextWidget(QString text = "");
+    bool processDropEvent(QDropEvent* event);
 
 signals:
     void signalSizeHintChanged(QSize size);
@@ -50,7 +54,6 @@ signals:
     void signalTextWidgetClicked(TimelineTextLabel* label);
     void signalTimeWidgetDoubleClicked(TimelineTimeLabel* label);
     void signalTextWidgetDoubleClicked(TimelineTextLabel* label);
-    void signalStartDrag();
 
 public slots:
     void actionInsertLeft(TimelineTextLabel* label);
@@ -76,4 +79,4 @@ private:
     QPoint press_pos;
 };
 
-#endif // TIMEBUCKET_H
+#endif // TIMELINEBUCKET_H

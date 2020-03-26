@@ -20,7 +20,7 @@ QListWidgetItem *TimelineWidget::addItem(QString time, QStringList texts)
 QListWidgetItem *TimelineWidget::insertItem(QString time, QStringList texts, int index)
 {
     QListWidgetItem* item = new QListWidgetItem();
-    TimeBucket* bucket = createItemWidget(time, texts);
+    TimelineBucket* bucket = createItemWidget(time, texts);
     if (index < 0 || index >= count()) // 添加到末尾
     {
         buckets.append(bucket);
@@ -37,13 +37,15 @@ QListWidgetItem *TimelineWidget::insertItem(QString time, QStringList texts, int
     item->setSizeHint(bucket->getSuitableSize());
 
     // 设置item的尺寸
-    connect(bucket, &TimeBucket::signalSizeHintChanged, this, [=](QSize size){
+    connect(bucket, &TimelineBucket::signalSizeHintChanged, this, [=](QSize size){
         item->setSizeHint(size);
     });
 
     // 连接事件信号
     connect(bucket, SIGNAL(signalTimeWidgetClicked(TimelineTimeLabel*)), this, SLOT(slotTimeWidgetClicked(TimelineTimeLabel*)));
     connect(bucket, SIGNAL(signalTextWidgetClicked(TimelineTextLabel*)), this, SLOT(slotTextWidgetClicked(TimelineTextLabel*)));
+    connect(bucket, SIGNAL(signalTimeWidgetDoubleClicked(TimelineTimeLabel*)), this, SLOT(slotTimeWidgetDoubleClicked(TimelineTimeLabel*)));
+    connect(bucket, SIGNAL(signalTextWidgetDoubleClicked(TimelineTextLabel*)), this, SLOT(slotTextWidgetDoubleClicked(TimelineTextLabel*)));
 
     updateUI();
     return item;
@@ -58,23 +60,9 @@ void TimelineWidget::removeItem(int index)
     buckets.takeAt(index)->deleteLater();
 }
 
-void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
+TimelineBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
 {
-    qDebug() << "TimelineWidget::dragEnterEvent";
-    event->accept();
-    QListWidget::dragEnterEvent(event);
-}
-
-void TimelineWidget::dropEvent(QDropEvent *event)
-{
-    qDebug() << "TimelineWidget::dropEvent";
-
-    QListWidget::dropEvent(event);
-}
-
-TimeBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
-{
-    TimeBucket* bucket = new TimeBucket(this);
+    TimelineBucket* bucket = new TimelineBucket(this);
     bucket->setTime(time);
     bucket->setText(texts);
     return bucket;
@@ -144,11 +132,6 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     connect(copy_text_action, SIGNAL(triggered()), this, SLOT(actionCopyText()));
 
     menu->exec(QCursor::pos());
-}
-
-void TimelineWidget::slotStartDrag(TimeBucket *bucket)
-{
-
 }
 
 void TimelineWidget::actionInsertAbove()

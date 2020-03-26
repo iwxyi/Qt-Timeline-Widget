@@ -9,6 +9,7 @@
 #include <QAction>
 #include <QClipboard>
 #include <QMouseEvent>
+#include <QDebug>
 
 class TimelineTextLabel : public QLabel
 {

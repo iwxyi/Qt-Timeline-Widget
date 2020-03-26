@@ -1,13 +1,13 @@
-#include "timebucket.h"
+#include "timelinebucket.h"
 
-TimeBucket::TimeBucket(QWidget *parent) : QWidget(parent)
+TimelineBucket::TimelineBucket(QWidget *parent) : QWidget(parent)
 {
     setAcceptDrops(true);
 
     initView();
 }
 
-void TimeBucket::initView()
+void TimelineBucket::initView()
 {
     hlayout = new QHBoxLayout(this);
     leading_dot = new TimelineLeadingDot(this);
@@ -33,19 +33,19 @@ void TimeBucket::initView()
     });
 }
 
-void TimeBucket::setVerticalIndex(int index)
+void TimelineBucket::setVerticalIndex(int index)
 {
     vertical_index = index;
 }
 
-void TimeBucket::setTime(QString time)
+void TimelineBucket::setTime(QString time)
 {
     time_widget->setText(time);
     time_widget->adjustSize();
     time_widget->setScaledContents(true);
 }
 
-void TimeBucket::setText(int index, QString text)
+void TimelineBucket::setText(int index, QString text)
 {
     if (index < 0 || index > text_widgets.size()) // 错误
         return ;
@@ -58,7 +58,7 @@ void TimeBucket::setText(int index, QString text)
     emit signalSizeHintChanged(getSuitableSize());
 }
 
-void TimeBucket::setText(QString text)
+void TimelineBucket::setText(QString text)
 {
     this->clearText();
     addTextWidget(text);
@@ -66,7 +66,7 @@ void TimeBucket::setText(QString text)
     emit signalSizeHintChanged(getSuitableSize());
 }
 
-void TimeBucket::setText(QStringList texts)
+void TimelineBucket::setText(QStringList texts)
 {
     this->clearText();
     foreach (QString text, texts)
@@ -77,7 +77,7 @@ void TimeBucket::setText(QStringList texts)
     emit signalSizeHintChanged(getSuitableSize());
 }
 
-void TimeBucket::addTextWidget(QString text)
+void TimelineBucket::addTextWidget(QString text)
 {
     TimelineTextLabel* label = new TimelineTextLabel(this);
     label->setText(text);
@@ -106,7 +106,7 @@ void TimeBucket::addTextWidget(QString text)
     });
 }
 
-void TimeBucket::actionInsertLeft(TimelineTextLabel *label)
+void TimelineBucket::actionInsertLeft(TimelineTextLabel *label)
 {
     int index = text_widgets.indexOf(label);
     if (index == -1)
@@ -115,7 +115,7 @@ void TimeBucket::actionInsertLeft(TimelineTextLabel *label)
 
 }
 
-void TimeBucket::actionInsertRight(TimelineTextLabel *label)
+void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
 {
     int index = text_widgets.indexOf(label);
     if (index == -1)
@@ -125,7 +125,7 @@ void TimeBucket::actionInsertRight(TimelineTextLabel *label)
 
 }
 
-void TimeBucket::actionDelete(TimelineTextLabel *label)
+void TimelineBucket::actionDelete(TimelineTextLabel *label)
 {
     int index = text_widgets.indexOf(label);
     if (index == -1)
@@ -134,7 +134,7 @@ void TimeBucket::actionDelete(TimelineTextLabel *label)
 
 }
 
-void TimeBucket::clearText()
+void TimelineBucket::clearText()
 {
     foreach (TimelineTextLabel* label, text_widgets) {
         label->deleteLater();
@@ -142,7 +142,7 @@ void TimeBucket::clearText()
     text_widgets.clear();
 }
 
-void TimeBucket::setTimeLabelWidth(int w)
+void TimelineBucket::setTimeLabelWidth(int w)
 {
     time_widget->setFixedWidth(w);
 }
@@ -150,7 +150,7 @@ void TimeBucket::setTimeLabelWidth(int w)
 /**
  * 根据里面的内容，获取对应合适的宽度和高度
  */
-QSize TimeBucket::getSuitableSize()
+QSize TimelineBucket::getSuitableSize()
 {
     int sw = horizone_spacing + time_widget->width();
     int sh = 0;
@@ -165,7 +165,7 @@ QSize TimeBucket::getSuitableSize()
     return QSize(sw, sh+vertical_spacing);
 }
 
-void TimeBucket::paintEvent(QPaintEvent *event)
+void TimelineBucket::paintEvent(QPaintEvent *event)
 {
     QWidget::paintEvent(event);
     QPainter painter(this);
@@ -199,43 +199,48 @@ void TimeBucket::paintEvent(QPaintEvent *event)
     }
 }
 
-void TimeBucket::enterEvent(QEvent *event)
+void TimelineBucket::enterEvent(QEvent *event)
 {
     QWidget::enterEvent(event);
 }
 
-void TimeBucket::leaveEvent(QEvent *event)
+void TimelineBucket::leaveEvent(QEvent *event)
 {
     QWidget::leaveEvent(event);
 }
 
-void TimeBucket::mousePressEvent(QMouseEvent *event)
+void TimelineBucket::mousePressEvent(QMouseEvent *event)
 {
+    if (event->button() == Qt::LeftButton)
+    {
+        press_pos = event->pos();
+    }
+
     QWidget::mousePressEvent(event);
 }
 
-void TimeBucket::mouseReleaseEvent(QMouseEvent *event)
+void TimelineBucket::mouseReleaseEvent(QMouseEvent *event)
 {
     QWidget::mouseReleaseEvent(event);
 }
 
-void TimeBucket::mouseDoubleClickEvent(QMouseEvent *event)
+void TimelineBucket::mouseDoubleClickEvent(QMouseEvent *event)
 {
     QWidget::mouseDoubleClickEvent(event);
 }
 
-void TimeBucket::mouseMoveEvent(QMouseEvent *event)
+void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
 {
     if (event->buttons() & Qt::LeftButton) // 左键拖拽
     {
         if ((event->pos() - press_pos).manhattanLength() >= QApplication::startDragDistance())
         {
             QMimeData* mime = new QMimeData();
-            mime->setData("BUCKET", QString::number(reinterpret_cast<int>(this)).toUtf8());
+            mime->setData(TIMELINE_BUCKET_MIME_KEY, QString::number(reinterpret_cast<int>(this)).toUtf8());
             QDrag* drag = new QDrag(this);
             drag->setMimeData(mime);
             drag->exec(Qt::MoveAction);
-            emit signalStartDrag();
+            return event->accept();
         }
     }
 
@@ -245,38 +250,62 @@ void TimeBucket::mouseMoveEvent(QMouseEvent *event)
 /**
  * 拖拽的内容进入事件
  */
-void TimeBucket::dragEnterEvent(QDragEnterEvent *event)
+void TimelineBucket::dragEnterEvent(QDragEnterEvent *event)
 {
-    qDebug() << "TimeBucket::dragEnterEvent";
-    const QMimeData* mime = event->mimeData();
-    if (mime->hasFormat("BUCKET"))
-    {
-        TimeBucket* bucket = reinterpret_cast<TimeBucket*>(mime->data("BUCKET").toInt());
-        if (bucket)
-        {
-            qDebug() << "accept";
-            event->accept();
-        }
-    }
+    if (processDropEvent(event))
+        event->accept();
+    QWidget::dragEnterEvent(event);
 }
 
-void TimeBucket::dragLeaveEvent(QDragLeaveEvent *event)
+void TimelineBucket::dragMoveEvent(QDragMoveEvent *event)
 {
-    qDebug() << "TimeBucket::dragLeaveEvent";
+    if (processDropEvent(event))
+        event->accept();
+
+    QWidget::dragMoveEvent(event);
+}
+
+void TimelineBucket::dragLeaveEvent(QDragLeaveEvent *event)
+{
     QWidget::dragLeaveEvent(event);
 }
 
 /**
  * 拖拽时鼠标松开事件
  */
-void TimeBucket::dropEvent(QDropEvent *event)
+void TimelineBucket::dropEvent(QDropEvent *event)
 {
-    qDebug() << "TimeBucket::dropEvent";
     const QMimeData* mime = event->mimeData();
-    if (mime->hasFormat("BUCKET"))
+    if (event->source() == this) // 内部拖拽
     {
 
     }
-    event->ignore();
+    else // 外部拖拽，交换顺序/移动数据
+    {
+
+    }
+
     QWidget::dropEvent(event);
+}
+
+bool TimelineBucket::processDropEvent(QDropEvent *event)
+{
+    const QMimeData* mime = event->mimeData();
+    if (mime->hasFormat(TIMELINE_BUCKET_MIME_KEY))
+    {
+        TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
+        if (bucket)
+        {
+            // 根据位置，修改不同的位置
+
+
+            return true;
+        }
+        return false;
+    }
+    else if (mime->hasFormat("TIMELINE_TEXT") || mime->hasFormat("TIMELINE_TIME"))
+    {
+
+    }
+    return false;
 }

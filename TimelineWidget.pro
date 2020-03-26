@@ -18,7 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    timebucket.cpp \
+    testlistwidget.cpp \
+    timelinebucket.cpp \
     timelineleadingdot.cpp \
     timelinetextlabel.cpp \
     timelinetimelabel.cpp \
@@ -26,7 +27,8 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
-    timebucket.h \
+    testlistwidget.h \
+    timelinebucket.h \
     timelineleadingdot.h \
     timelinetextlabel.h \
     timelinetimelabel.h \

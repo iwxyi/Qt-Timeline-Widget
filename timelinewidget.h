@@ -10,7 +10,7 @@
 #include <QAction>
 #include <QMimeData>
 #include <QDrag>
-#include "timebucket.h"
+#include "timelinebucket.h"
 
 class TimelineWidget : public QListWidget
 {
@@ -24,11 +24,9 @@ public:
     void removeItem(int index);
 
 protected:
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
 
 private:
-    TimeBucket *createItemWidget(QString time, QStringList texts);
+    TimelineBucket *createItemWidget(QString time, QStringList texts);
 
 signals:
 
@@ -39,7 +37,6 @@ public slots:
     void slotTimeWidgetDoubleClicked(TimelineTimeLabel* label);
     void slotTextWidgetDoubleClicked(TimelineTextLabel* label);
     void slotMenuShowed(const QPoint& pos);
-    void slotStartDrag(TimeBucket* bucket);
 
     void actionInsertAbove();
     void actionInsertUnder();
@@ -47,7 +44,7 @@ public slots:
     void actionCopyText();
 
 private:
-    QList<TimeBucket*> buckets;
+    QList<TimelineBucket*> buckets;
 };
 
 #endif // TIMELINEWIDGET_H

@@ -18,6 +18,22 @@
     <item>
      <widget class="TimelineWidget" name="listWidget"/>
     </item>
+    <item>
+     <widget class="TestListWidget" name="listWidget_2">
+      <property name="dragEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropOverwriteMode">
+       <bool>true</bool>
+      </property>
+      <property name="dragDropMode">
+       <enum>QAbstractItemView::DropOnly</enum>
+      </property>
+      <property name="defaultDropAction">
+       <enum>Qt::MoveAction</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -37,6 +53,11 @@
    <class>TimelineWidget</class>
    <extends>QListWidget</extends>
    <header>timelinewidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TestListWidget</class>
+   <extends>QListWidget</extends>
+   <header>testlistwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

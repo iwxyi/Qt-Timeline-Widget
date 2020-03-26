@@ -16,6 +16,15 @@ MainWindow::MainWindow(QWidget *parent)
             sl << ("文本"+QString::number(rand()%90000+10000));
         ui->listWidget->addItem("2020.3.13", sl);
     }
+    ((QListWidget*)ui->listWidget)->addItem("aaaaaaaaaaa");
+
+    ui->listWidget_2->hide();
+    ui->listWidget_2->addItem("aaaaaaaaaaaaaa1111");
+    ui->listWidget_2->addItem("aaaaaaaaaaaaaa2222");
+    ui->listWidget_2->addItem("aaaaaaaaaaaaaa3333");
+    ui->listWidget_2->addItem("aaaaaaaaaaaaaa4444");
+    ui->listWidget_2->addItem("aaaaaaaaaaaaaa5555");
+    ui->listWidget_2->addItem("aaaaaaaaaaaaaa6666");
 }
 
 MainWindow::~MainWindow()
