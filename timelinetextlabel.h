@@ -7,6 +7,8 @@
 #include <QMouseEvent>
 #include <QMenu>
 #include <QAction>
+#include <QClipboard>
+#include <QMouseEvent>
 
 class TimelineTextLabel : public QLabel
 {
@@ -17,9 +19,15 @@ public:
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
 
 signals:
     void signalClicked();
+    void signalDoubleClicked();
+    void signalInsertLeft();
+    void signalInsertRight();
+    void signalDelete();
+    void signalCopyText();
 
 public slots:
     void slotMenuShowed(const QPoint &pos);

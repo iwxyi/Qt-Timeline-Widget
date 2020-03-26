@@ -2,6 +2,8 @@
 
 TimeBucket::TimeBucket(QWidget *parent) : QWidget(parent)
 {
+    setAcceptDrops(true);
+
     initView();
 }
 
@@ -25,6 +27,9 @@ void TimeBucket::initView()
 
     connect(time_widget, &TimelineTimeLabel::signalClicked, this, [=] {
         emit signalTimeWidgetClicked(time_widget);
+    });
+    connect(time_widget, &TimelineTimeLabel::signalDoubleClicked, this, [=] {
+        emit signalTimeWidgetDoubleClicked(time_widget);
     });
 }
 
@@ -87,6 +92,46 @@ void TimeBucket::addTextWidget(QString text)
     connect(label, &TimelineTextLabel::signalClicked, this, [=] {
         emit signalTextWidgetClicked(label);
     });
+    connect(label, &TimelineTextLabel::signalDoubleClicked, this, [=] {
+        emit signalTextWidgetDoubleClicked(label);
+    });
+    connect(label, &TimelineTextLabel::signalInsertLeft, this, [=]{
+        actionInsertLeft(label);
+    });
+    connect(label, &TimelineTextLabel::signalInsertRight, this, [=]{
+        actionInsertRight(label);
+    });
+    connect(label, &TimelineTextLabel::signalDelete, this, [=]{
+        actionDelete(label);
+    });
+}
+
+void TimeBucket::actionInsertLeft(TimelineTextLabel *label)
+{
+    int index = text_widgets.indexOf(label);
+    if (index == -1)
+        return ;
+
+
+}
+
+void TimeBucket::actionInsertRight(TimelineTextLabel *label)
+{
+    int index = text_widgets.indexOf(label);
+    if (index == -1)
+        return ;
+
+
+
+}
+
+void TimeBucket::actionDelete(TimelineTextLabel *label)
+{
+    int index = text_widgets.indexOf(label);
+    if (index == -1)
+        return ;
+
+
 }
 
 void TimeBucket::clearText()
@@ -152,4 +197,86 @@ void TimeBucket::paintEvent(QPaintEvent *event)
     {
         painter.drawLine(leading_dot->geometry().center(), QPoint(leading_dot->geometry().center().x(), height()));
     }
+}
+
+void TimeBucket::enterEvent(QEvent *event)
+{
+    QWidget::enterEvent(event);
+}
+
+void TimeBucket::leaveEvent(QEvent *event)
+{
+    QWidget::leaveEvent(event);
+}
+
+void TimeBucket::mousePressEvent(QMouseEvent *event)
+{
+    QWidget::mousePressEvent(event);
+}
+
+void TimeBucket::mouseReleaseEvent(QMouseEvent *event)
+{
+    QWidget::mouseReleaseEvent(event);
+}
+
+void TimeBucket::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    QWidget::mouseDoubleClickEvent(event);
+}
+
+void TimeBucket::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton) // 左键拖拽
+    {
+        if ((event->pos() - press_pos).manhattanLength() >= QApplication::startDragDistance())
+        {
+            QMimeData* mime = new QMimeData();
+            mime->setData("BUCKET", QString::number(reinterpret_cast<int>(this)).toUtf8());
+            QDrag* drag = new QDrag(this);
+            drag->setMimeData(mime);
+            drag->exec(Qt::MoveAction);
+            emit signalStartDrag();
+        }
+    }
+
+    QWidget::mouseMoveEvent(event);
+}
+
+/**
+ * 拖拽的内容进入事件
+ */
+void TimeBucket::dragEnterEvent(QDragEnterEvent *event)
+{
+    qDebug() << "TimeBucket::dragEnterEvent";
+    const QMimeData* mime = event->mimeData();
+    if (mime->hasFormat("BUCKET"))
+    {
+        TimeBucket* bucket = reinterpret_cast<TimeBucket*>(mime->data("BUCKET").toInt());
+        if (bucket)
+        {
+            qDebug() << "accept";
+            event->accept();
+        }
+    }
+}
+
+void TimeBucket::dragLeaveEvent(QDragLeaveEvent *event)
+{
+    qDebug() << "TimeBucket::dragLeaveEvent";
+    QWidget::dragLeaveEvent(event);
+}
+
+/**
+ * 拖拽时鼠标松开事件
+ */
+void TimeBucket::dropEvent(QDropEvent *event)
+{
+    qDebug() << "TimeBucket::dropEvent";
+    const QMimeData* mime = event->mimeData();
+    if (mime->hasFormat("BUCKET"))
+    {
+
+    }
+    event->ignore();
+    QWidget::dropEvent(event);
 }

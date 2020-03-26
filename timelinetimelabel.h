@@ -9,6 +9,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QDate>
+#include <QMouseEvent>
 
 class TimelineTimeLabel : public QLabel
 {
@@ -19,9 +20,12 @@ public:
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 signals:
     void signalClicked();
+    void signalDoubleClicked();
 
 public slots:
     void slotMenuShowed(const QPoint &pos);

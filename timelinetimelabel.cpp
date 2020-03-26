@@ -27,6 +27,26 @@ void TimelineTimeLabel::mouseReleaseEvent(QMouseEvent *event)
     QLabel::mouseReleaseEvent(event);
 }
 
+void TimelineTimeLabel::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton)
+    {
+        emit signalDoubleClicked();
+    }
+
+    QLabel::mouseDoubleClickEvent(event);
+}
+
+void TimelineTimeLabel::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton)
+    {
+
+    }
+
+    QLabel::mouseMoveEvent(event);
+}
+
 void TimelineTimeLabel::slotMenuShowed(const QPoint& pos)
 {
     QMenu* menu = new QMenu("菜单", this);

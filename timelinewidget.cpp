@@ -2,6 +2,7 @@
 
 TimelineWidget::TimelineWidget(QWidget *parent) : QListWidget(parent)
 {
+    setAcceptDrops(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 }
@@ -57,6 +58,20 @@ void TimelineWidget::removeItem(int index)
     buckets.takeAt(index)->deleteLater();
 }
 
+void TimelineWidget::dragEnterEvent(QDragEnterEvent *event)
+{
+    qDebug() << "TimelineWidget::dragEnterEvent";
+    event->accept();
+    QListWidget::dragEnterEvent(event);
+}
+
+void TimelineWidget::dropEvent(QDropEvent *event)
+{
+    qDebug() << "TimelineWidget::dropEvent";
+
+    QListWidget::dropEvent(event);
+}
+
 TimeBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
 {
     TimeBucket* bucket = new TimeBucket(this);
@@ -74,6 +89,16 @@ void TimelineWidget::updateUI()
 
 void TimelineWidget::slotTimeWidgetClicked(TimelineTimeLabel *label)
 {
+
+}
+
+void TimelineWidget::slotTextWidgetClicked(TimelineTextLabel *label)
+{
+
+}
+
+void TimelineWidget::slotTimeWidgetDoubleClicked(TimelineTimeLabel *label)
+{
     QString text = label->text();
     bool ok;
     text = QInputDialog::getText(this, "修改时间", "请输入新的时间", QLineEdit::Normal, text, &ok);
@@ -82,7 +107,7 @@ void TimelineWidget::slotTimeWidgetClicked(TimelineTimeLabel *label)
     label->setText(text);
 }
 
-void TimelineWidget::slotTextWidgetClicked(TimelineTextLabel *label)
+void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
 {
     QString text = label->text();
     bool ok;
@@ -119,6 +144,11 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     connect(copy_text_action, SIGNAL(triggered()), this, SLOT(actionCopyText()));
 
     menu->exec(QCursor::pos());
+}
+
+void TimelineWidget::slotStartDrag(TimeBucket *bucket)
+{
+
 }
 
 void TimelineWidget::actionInsertAbove()
