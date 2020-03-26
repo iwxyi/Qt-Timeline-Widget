@@ -25,6 +25,9 @@ void TimelineBucket::initView()
     connect(time_widget, &TimelineTimeLabel::signalDoubleClicked, this, [=] {
         emit signalTimeWidgetDoubleClicked(time_widget);
     });
+    connect(time_widget, &TimelineTimeLabel::signalSizeChanged, this, [=](QSize size) { // 一般由 setTime 触发
+        adjustWidgetsPositions();
+    });
 }
 
 void TimelineBucket::setVerticalIndex(int index)
@@ -35,10 +38,8 @@ void TimelineBucket::setVerticalIndex(int index)
 void TimelineBucket::setTime(QString time)
 {
     time_widget->setText(time);
-    time_widget->adjustSize();
     time_widget->setScaledContents(true);
-
-    adjustWidgetsPositions();
+    time_widget->adjustSize();
 }
 
 void TimelineBucket::setText(int index, QString text)
@@ -50,15 +51,14 @@ void TimelineBucket::setText(int index, QString text)
 
     // 设置内容
     text_widgets.at(index)->setText(text);
-
-    adjustWidgetsPositions();
+    text_widgets.at(index)->adjustSize();
 }
 
 void TimelineBucket::setText(QString text)
 {
     this->clearText();
     addTextWidget(text);
-
+    adjustWidgetsSize();
     adjustWidgetsPositions();
 }
 
@@ -70,15 +70,30 @@ void TimelineBucket::setText(QStringList texts)
         addTextWidget(text);
     }
 
+    adjustWidgetsSize();
     adjustWidgetsPositions();
+}
+
+QString TimelineBucket::getText(int index)
+{
+    if (index < 0 || index >= text_widgets.size())
+        return "";
+    return text_widgets.at(index)->text();
 }
 
 void TimelineBucket::addTextWidget(QString text)
 {
     TimelineTextLabel* label = new TimelineTextLabel(this);
     label->setText(text);
+    label->adjustSize(false);
     text_widgets.append(label);
+    label->show();
 
+    connectWidgetEvent(label);
+}
+
+void TimelineBucket::connectWidgetEvent(TimelineTextLabel *label)
+{
     connect(label, &TimelineTextLabel::signalClicked, this, [=] {
         emit signalTextWidgetClicked(label);
     });
@@ -96,8 +111,12 @@ void TimelineBucket::addTextWidget(QString text)
     });
     connect(label, &TimelineTextLabel::signalDraggedToOut, this, [=]{
         int index = text_widgets.indexOf(label);
-        text_widgets.removeAt(index);
-        adjustWidgetsPositionsWithAnimation(index);
+        text_widgets.takeAt(index)->deleteLater();
+        adjustBucketSize();
+        adjustWidgetsPositionWithAnimation(index);
+    });
+    connect(label, &TimelineTextLabel::signalSizeChanged, this, [=](QSize size) {
+        adjustWidgetsPositions();
     });
 }
 
@@ -147,6 +166,19 @@ void TimelineBucket::setTimeLabelWidth(int w)
     time_widget->setFixedWidth(w);
 }
 
+/**
+ * 修改控件尺寸（不包含位置）
+ */
+void TimelineBucket::adjustWidgetsSize()
+{
+    time_widget->adjustSize(false);
+    for (int i = 0; i < text_widgets.size(); i++)
+        text_widgets.at(i)->adjustSize(false);
+}
+
+/**
+ * 根据控件的大小，修改整个外框的大小
+ */
 void TimelineBucket::adjustBucketSize()
 {
     QSize size = getSuitableSize();
@@ -155,26 +187,35 @@ void TimelineBucket::adjustBucketSize()
 }
 
 /**
- * 根据里面的内容，获取对应合适的宽度和高度
+ * 根据控件大小，获取对应合适的宽度和高度
  */
 QSize TimelineBucket::getSuitableSize()
 {
-    int sw = horizone_spacing + time_widget->width();
-    int sh = 0;
+    int sw = padding_left + leading_dot_radius*2 + time_widget->width() + dot_time_spacing;
+    int sh = time_widget->height();
     for (int i = 0; i < text_widgets.size(); ++i)
     {
         if (sh < text_widgets.at(i)->height())
             sh = text_widgets.at(i)->height();
         sw += horizone_spacing + text_widgets.at(i)->width();
     }
-    sw += padding_left + leading_dot_radius*2 + dot_time_spacing + horizone_spacing * text_widgets.size();
+    sw += horizone_spacing * (text_widgets.size()+1);
     sh += vertical_spacing;
     return QSize(sw, sh);
 }
 
+/**
+ * 移动所有控件的位置（不改变大小）
+ */
 void TimelineBucket::adjustWidgetsPositions(int start)
 {
-    setMinimumSize(getSuitableSize());
+    QSize old_size = size();
+    QSize size = getSuitableSize();
+    if (size != old_size)
+    {
+        setMinimumSize(size);
+        emit signalSizeHintChanged(size);
+    }
     int mid_y = height() / 2;
     leading_dot->move(padding_left, mid_y-leading_dot_radius);
     time_widget->move(leading_dot->geometry().right() + dot_time_spacing, mid_y - time_widget->height()/2);
@@ -190,7 +231,10 @@ void TimelineBucket::adjustWidgetsPositions(int start)
     }
 }
 
-void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
+/**
+ * 调整所有控件的位置，包含动画
+ */
+void TimelineBucket::adjustWidgetsPositionWithAnimation(int start, int end)
 {
     setMinimumSize(getSuitableSize());
     int mid_y = height() / 2;
@@ -204,16 +248,16 @@ void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
     {
         TimelineTextLabel* label = text_widgets.at(i);
         left += horizone_spacing;
-        label->move(left, mid_y - label->height() / 2);
-        left += label->width();
 
         QPropertyAnimation* ani = new QPropertyAnimation(label, "pos");
         ani->setStartValue(label->pos());
-        ani->setEndValue(QPoint(left+horizone_spacing, label->pos().y()));
+        ani->setEndValue(QPoint(left, mid_y - label->height()/2));
         ani->setDuration(300);
         ani->setEasingCurve(QEasingCurve::OutQuart);
         connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
         ani->start();
+
+        left += label->width();
     }
 }
 
@@ -380,6 +424,8 @@ void TimelineBucket::dropEvent(QDropEvent *event)
             if (from_index == -1) // 外面拖进来的
             {
                 auto widget = new TimelineTextLabel(label, this);
+                connectWidgetEvent(widget);
+                widget->move(label->x(), label->getGlobalPos().y() - this->pos().y());
                 widget->show();
                 emit label->signalDraggedToOut(); // 从父类那里删掉
 
@@ -388,13 +434,11 @@ void TimelineBucket::dropEvent(QDropEvent *event)
             else // 自己的，删掉旧的
             {
                 auto widget = text_widgets.at(from_index);
-
                 text_widgets.removeAt(from_index);
-
                 text_widgets.insert(to_index, widget);
             }
-
-            adjustWidgetsPositions();
+            update();
+            adjustWidgetsPositionWithAnimation();
         }
     }
 

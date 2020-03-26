@@ -34,6 +34,7 @@ TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int 
     }
 
     bucket->setVerticalIndex(count()-1); // 已经添加了，下标索引要-1
+    bucket->adjustWidgetsPositions();
 
     // 设置item的尺寸
     connect(bucket, &TimelineBucket::signalSizeHintChanged, this, [=](QSize size){
@@ -47,7 +48,6 @@ TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int 
     connect(bucket, SIGNAL(signalTimeWidgetDoubleClicked(TimelineTimeLabel*)), this, SLOT(slotTimeWidgetDoubleClicked(TimelineTimeLabel*)));
     connect(bucket, SIGNAL(signalTextWidgetDoubleClicked(TimelineTextLabel*)), this, SLOT(slotTextWidgetDoubleClicked(TimelineTextLabel*)));
 
-//    connect(bucket, SIGNAL(signalDroppedAndMoved(TimelineBucket*)), this, SLOT(slotDroppedAndMoved(TimelineBucket*)));
     connect(bucket, &TimelineBucket::signalDroppedAndMoved, this, [=](TimelineBucket* from_bucket) {
         slotDroppedAndMoved(from_bucket, bucket);
     });
@@ -127,16 +127,20 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     else
         end++;
     int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
+    qDebug() << "调整：" << start << end;
     for (int i = start; i < end; i++)
     {
         TimelineBucket* bucket = buckets.at(i);
-        QPropertyAnimation* ani = new QPropertyAnimation(bucket, "pos");
-        ani->setStartValue(bucket->pos());
-        ani->setEndValue(QPoint(bucket->pos().x(), top));
-        ani->setDuration(300);
-        ani->setEasingCurve(QEasingCurve::OutQuart);
-        connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
-        ani->start();
+        if (top != bucket->pos().y())
+        {
+            QPropertyAnimation* ani = new QPropertyAnimation(bucket, "pos");
+            ani->setStartValue(bucket->pos());
+            ani->setEndValue(QPoint(bucket->pos().x(), top));
+            ani->setDuration(300);
+            ani->setEasingCurve(QEasingCurve::OutQuart);
+            connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+            ani->start();
+        }
         top += bucket->height();
     }
 }
@@ -219,6 +223,7 @@ void TimelineWidget::slotTimeWidgetDoubleClicked(TimelineTimeLabel *label)
     if (!ok)
         return ;
     label->setText(text);
+    label->adjustSize();
 }
 
 void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
@@ -280,8 +285,8 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
     {
         buckets.insert(to_index, bucket);
     }
-//    adjustBucketsPositions(qMin(from_index, to_index));
-    adjustBucketsPositionsWithAnimation(qMin(from_index, to_index), qMax(from_index, to_index));
+
+    adjustBucketsPositionsWithAnimation(qMin(from_index, to_index));
 }
 
 void TimelineWidget::actionInsertAbove()

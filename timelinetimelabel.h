@@ -17,6 +17,8 @@ class TimelineTimeLabel : public QLabel
 public:
     TimelineTimeLabel(QWidget* parent = nullptr);
 
+    void adjustSize(bool notify = true);
+
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
@@ -26,6 +28,7 @@ protected:
 signals:
     void signalClicked();
     void signalDoubleClicked();
+    void signalSizeChanged(QSize size);
 
 public slots:
     void slotMenuShowed(const QPoint &pos);

@@ -26,14 +26,16 @@ public:
     void setText(int index, QString text);
     void setText(QString text);
     void setText(QStringList texts);
+    QString getText(int index);
 
     void clearText();
 
     void setTimeLabelWidth(int w);
+    void adjustWidgetsSize();
     void adjustBucketSize();
     QSize getSuitableSize();
     void adjustWidgetsPositions(int start = 0);
-    void adjustWidgetsPositionsWithAnimation(int start = 0, int end = -1);
+    void adjustWidgetsPositionWithAnimation(int start = 0, int end = -1);
 
     bool isSelected();
     void setSelected(bool select);
@@ -53,6 +55,7 @@ protected:
 
 private:
     void addTextWidget(QString text = "");
+    void connectWidgetEvent(TimelineTextLabel* label);
     bool canDropMimeData(QDropEvent* event);
 
 signals:

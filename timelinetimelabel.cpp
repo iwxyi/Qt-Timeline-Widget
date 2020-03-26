@@ -8,6 +8,14 @@ TimelineTimeLabel::TimelineTimeLabel(QWidget *parent) : QLabel(parent)
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 }
 
+void TimelineTimeLabel::adjustSize(bool notify)
+{
+    QSize old_size = size();
+    QLabel::adjustSize();
+    if (notify && old_size != size())
+        emit signalSizeChanged(size());
+}
+
 void TimelineTimeLabel::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)

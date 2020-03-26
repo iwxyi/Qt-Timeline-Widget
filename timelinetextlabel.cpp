@@ -11,6 +11,20 @@ TimelineTextLabel::TimelineTextLabel(QWidget *parent) : QLabel(parent)
 TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another, QWidget *parent) : TimelineTextLabel(parent)
 {
     setText(another->text());
+    resize(another->size());
+}
+
+void TimelineTextLabel::adjustSize(bool notify)
+{
+    QSize old_size = size();
+    QLabel::adjustSize();
+    if (notify && old_size != size())
+        emit signalSizeChanged(size());
+}
+
+QPoint TimelineTextLabel::getGlobalPos()
+{
+    return pos() + parentWidget()->pos();
 }
 
 void TimelineTextLabel::mousePressEvent(QMouseEvent *event)

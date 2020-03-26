@@ -22,6 +22,10 @@ public:
     TimelineTextLabel(QWidget* parent = nullptr);
     TimelineTextLabel(TimelineTextLabel*& another, QWidget* parent = nullptr);
 
+    void adjustSize(bool notify = true);
+
+    QPoint getGlobalPos();
+
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
@@ -36,6 +40,7 @@ signals:
     void signalDelete();
     void signalCopyText();
     void signalDraggedToOut();
+    void signalSizeChanged(QSize size);
 
 public slots:
     void slotMenuShowed(const QPoint &pos);
