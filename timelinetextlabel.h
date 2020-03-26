@@ -10,17 +10,23 @@
 #include <QClipboard>
 #include <QMouseEvent>
 #include <QDebug>
+#include <QMimeData>
+#include <QDrag>
+
+#define TIMELINE_TEXT_MIME_KEY "TIMELINE_TEXT_WIDGET"
 
 class TimelineTextLabel : public QLabel
 {
     Q_OBJECT
 public:
     TimelineTextLabel(QWidget* parent = nullptr);
+    TimelineTextLabel(TimelineTextLabel*& another);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent *ev) override;
 
 signals:
     void signalClicked();
@@ -29,6 +35,7 @@ signals:
     void signalInsertRight();
     void signalDelete();
     void signalCopyText();
+    void signalDraggedToOut();
 
 public slots:
     void slotMenuShowed(const QPoint &pos);

@@ -106,6 +106,14 @@ void TimelineBucket::addTextWidget(QString text)
     connect(label, &TimelineTextLabel::signalDelete, this, [=]{
         actionDelete(label);
     });
+    connect(label, &TimelineTextLabel::signalDraggedToOut, this, [=]{
+        int index = text_widgets.indexOf(label);
+        hlayout->removeItem(text_spacers.at(index));
+        hlayout->removeWidget(label);
+        delete text_spacers.takeAt(index);
+        text_widgets.removeAt(index);
+
+    });
 }
 
 void TimelineBucket::actionInsertLeft(TimelineTextLabel *label)
@@ -133,6 +141,11 @@ void TimelineBucket::actionDelete(TimelineTextLabel *label)
     if (index == -1)
         return ;
 
+
+}
+
+void TimelineBucket::actionMoveTextLabel(int from, int to)
+{
 
 }
 
@@ -173,6 +186,35 @@ QSize TimelineBucket::getSuitableSize()
     sh += hlayout->margin() * 2;
 
     return QSize(sw, sh+vertical_spacing);
+}
+
+void TimelineBucket::adjustTextsPositions(int start)
+{
+    int left = (start-1)>=0 ? text_spacers.at(start-1)->geometry().left() : time_widget->geometry().right()+1;
+    int end = text_widgets.size();
+    for (int i = start; i < end; i++)
+    {
+        // 自动调整的，无需手动干预
+    }
+}
+
+void TimelineBucket::adjustTextsPositionsWithAnimation(int start, int end)
+{
+    int left = (start-1)>=0 ? text_spacers.at(start-1)->geometry().left() : time_widget->geometry().right()+1;
+    if (end == -1)
+        end = text_widgets.size();
+    for (int i = start; i < end; i++)
+    {
+        auto spacer = text_spacers.at(i);
+        auto widget = text_widgets.at(i);
+        QPropertyAnimation* ani = new QPropertyAnimation(widget, "pos");
+        ani->setStartValue(widget->pos());
+        ani->setEndValue(QPoint(left+spacer->geometry().width(), widget->pos().y()));
+        ani->setDuration(300);
+        ani->setEasingCurve(QEasingCurve::OutQuart);
+        connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+        ani->start();
+    }
 }
 
 bool TimelineBucket::isSelected()
@@ -282,14 +324,14 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
  */
 void TimelineBucket::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (processDropEvent(event))
+    if (canDropMimeData(event))
         event->accept();
     QWidget::dragEnterEvent(event);
 }
 
 void TimelineBucket::dragMoveEvent(QDragMoveEvent *event)
 {
-    if (processDropEvent(event))
+    if (canDropMimeData(event))
         event->accept();
 
     QWidget::dragMoveEvent(event);
@@ -308,18 +350,75 @@ void TimelineBucket::dropEvent(QDropEvent *event)
     const QMimeData* mime = event->mimeData();
     if (event->source() == this) // 内部拖拽
     {
-
+        ; // 经常触发的自己拖拽给自己，无视
     }
     else // 外部拖拽，交换顺序/移动数据
     {
-        TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
-        emit signalDroppedAndMoved(bucket);
+        if (mime->hasFormat(TIMELINE_BUCKET_MIME_KEY)) // 上下交换行
+        {
+            TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
+            emit signalDroppedAndMoved(bucket);
+        }
+        else if (mime->hasFormat(TIMELINE_TEXT_MIME_KEY)) // 左右交换文字
+        {
+            TimelineTextLabel* label = reinterpret_cast<TimelineTextLabel*>(mime->data(TIMELINE_TEXT_MIME_KEY).toInt());
+
+            // 获取拖拽到目标的索引
+            int to_index = text_widgets.size(); // 默认是到最后面
+            QPoint pos = event->pos();
+            for (int i = 0; i < text_widgets.size(); i++)
+            {
+                if (text_widgets.at(i)->geometry().left() >= pos.x()) // 移到这个 label 的后面
+                {
+                    to_index = i;
+                    break;
+                }
+            }
+
+            // 放下的位置的索引
+            int layout_index = 0;
+            if (to_index == text_widgets.size()) // 最后面
+                layout_index = hlayout->count();
+            else
+                layout_index = hlayout->indexOf(text_widgets.at(to_index)); // 获取前面空白的位置
+
+            // 获取被拖拽的目标
+            int from_index = text_widgets.indexOf(label);
+            if (from_index == -1) // 外面拖进来的
+            {
+                emit label->signalDraggedToOut(); // 从父类那里删掉
+                label->setParent(this);
+
+                auto spacer = new QSpacerItem(horizone_spacing, 1);
+                text_spacers.insert(to_index, spacer);
+                text_widgets.insert(to_index, label);
+
+                hlayout->insertWidget(layout_index, label);
+                hlayout->insertItem(layout_index, spacer);
+            }
+            else // 自己的，删掉旧的
+            {
+                auto spacer = text_spacers.at(from_index);
+                auto widget = text_widgets.at(from_index);
+
+                hlayout->removeItem(spacer);
+                hlayout->removeWidget(widget);
+                text_spacers.removeAt(from_index);
+                text_widgets.removeAt(from_index);
+
+                text_spacers.insert(to_index, spacer);
+                text_widgets.insert(to_index, widget);
+
+                hlayout->insertWidget(layout_index, label);
+                hlayout->insertItem(layout_index, spacer);
+            }
+        }
     }
 
     QWidget::dropEvent(event);
 }
 
-bool TimelineBucket::processDropEvent(QDropEvent *event)
+bool TimelineBucket::canDropMimeData(QDropEvent *event)
 {
     const QMimeData* mime = event->mimeData();
     if (mime->hasFormat(TIMELINE_BUCKET_MIME_KEY)) // 整行拖拽
@@ -327,16 +426,12 @@ bool TimelineBucket::processDropEvent(QDropEvent *event)
         TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
         if (bucket)
         {
-            // 根据位置，修改不同的位置
-
-
             return true;
         }
-        return false;
     }
-    else if (mime->hasFormat("TIMELINE_TEXT_WIDGET")) // 单个TextWidget拖拽
+    else if (mime->hasFormat(TIMELINE_TEXT_MIME_KEY)) // 单个TextWidget拖拽
     {
-
+        return true;
     }
     return false;
 }

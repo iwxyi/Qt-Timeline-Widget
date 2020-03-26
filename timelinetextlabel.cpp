@@ -8,6 +8,11 @@ TimelineTextLabel::TimelineTextLabel(QWidget *parent) : QLabel(parent)
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 }
 
+TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another)
+{
+    setText(another->text());
+}
+
 void TimelineTextLabel::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
@@ -35,6 +40,29 @@ void TimelineTextLabel::mouseDoubleClickEvent(QMouseEvent *event)
     }
 
     QLabel::mouseDoubleClickEvent(event);
+}
+
+void TimelineTextLabel::mouseMoveEvent(QMouseEvent *event)
+{
+    if (event->buttons() & Qt::LeftButton) // 左键拖拽
+    {
+        if ((event->pos() - press_pos).manhattanLength() >= QApplication::startDragDistance())
+        {
+            QMimeData* mime = new QMimeData();
+            mime->setData(TIMELINE_TEXT_MIME_KEY, QString::number(reinterpret_cast<int>(this)).toUtf8());
+            QDrag* drag = new QDrag(this);
+            drag->setMimeData(mime);
+            drag->setHotSpot(event->pos()); // 好像没什么用
+            QPixmap pixmap(size());
+            pixmap.fill(Qt::transparent);
+            render(&pixmap);
+            drag->setPixmap(pixmap);
+            drag->exec(Qt::MoveAction);
+            return event->accept();
+        }
+    }
+
+    QLabel::mouseMoveEvent(event);
 }
 
 void TimelineTextLabel::slotMenuShowed(const QPoint &pos)

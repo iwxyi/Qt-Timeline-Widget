@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QMimeData>
 #include <QDrag>
+#include <QPropertyAnimation>
 #include "timelinetimelabel.h"
 #include "timelinetextlabel.h"
 #include "timelineleadingdot.h"
@@ -31,6 +32,8 @@ public:
     void setTimeLabelWidth(int w);
     void adjustBucketSize();
     QSize getSuitableSize();
+    void adjustTextsPositions(int start = 0);
+    void adjustTextsPositionsWithAnimation(int start = 0, int end = -1);
 
     bool isSelected();
     void setSelected(bool select);
@@ -50,7 +53,7 @@ protected:
 
 private:
     void addTextWidget(QString text = "");
-    bool processDropEvent(QDropEvent* event);
+    bool canDropMimeData(QDropEvent* event);
 
 signals:
     void signalSizeHintChanged(QSize size);
@@ -59,12 +62,13 @@ signals:
     void signalTextWidgetClicked(TimelineTextLabel* label);
     void signalTimeWidgetDoubleClicked(TimelineTimeLabel* label);
     void signalTextWidgetDoubleClicked(TimelineTextLabel* label);
-    void signalDroppedAndMoved(TimelineBucket* bucket);
+    void signalDroppedAndMoved(TimelineBucket* bucket); // 被拖拽到外面去，从现在这里删掉
 
 public slots:
     void actionInsertLeft(TimelineTextLabel* label);
     void actionInsertRight(TimelineTextLabel* label);
     void actionDelete(TimelineTextLabel* label);
+    void actionMoveTextLabel(int from, int to);
 
 private:
     QHBoxLayout* hlayout;
