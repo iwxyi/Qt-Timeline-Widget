@@ -6,6 +6,7 @@ TimelineTextLabel::TimelineTextLabel(QWidget *parent) : QLabel(parent)
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
+    setWordWrap(true); // 根据宽度自动换行（ 但是需要手动确定宽高）
 }
 
 TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another, QWidget *parent) : TimelineTextLabel(parent)
@@ -17,7 +18,24 @@ TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another, QWidget *paren
 void TimelineTextLabel::adjustSize(bool notify)
 {
     QSize old_size = size();
-    QLabel::adjustSize();
+    {
+        QFontMetrics fm(this->font());
+        int line_height = fm.lineSpacing();
+        int total_width = fm.horizontalAdvance(text());
+        if (total_width <= 20)
+        {
+            setMinimumWidth(0);
+        }
+        else
+        {
+            // 选择合适的比例
+            int line_count = sqrt(qMax(total_width / line_height / 5, 1));
+            int text_width = (total_width + line_count - 1) / line_count;
+            setMinimumWidth(text_width + 20); // padding=10
+        }
+        QLabel::adjustSize();
+    }
+
     if (notify && old_size != size())
         emit signalSizeChanged(size());
 }
