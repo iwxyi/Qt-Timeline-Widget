@@ -65,6 +65,7 @@ private:
 
 signals:
     void signalSizeHintChanged(QSize size);
+    void signalBucketWidgetPressed();
     void signalBucketWidgetClicked();
     void signalTimeWidgetClicked(TimelineTimeLabel* label);
     void signalTextWidgetClicked(TimelineTextLabel* label);

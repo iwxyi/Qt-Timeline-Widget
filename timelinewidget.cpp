@@ -7,34 +7,45 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QWidget(parent)
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 
     current_index = -1;
+
+    updateUI();
 }
 
 TimelineBucket *TimelineWidget::addItem(QString time, QString text)
 {
-    return addItem(time, QStringList{text});
+    addItem(time, QStringList{text});
+    adjustBucketsPositionsWithAnimation();
 }
 
 TimelineBucket *TimelineWidget::addItem(QString time, QStringList texts)
 {
-    return insertItem(time, texts, -1);
+    insertItem(time, texts, -1);
+    adjustBucketsPositionsWithAnimation();
 }
 
 TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int index)
 {
     TimelineBucket* bucket = createItemWidget(time, texts);
+    bucket->adjustWidgetsPositions();
     if (index < 0 || index >= count()) // 添加到末尾
     {
         buckets.append(bucket);
-        adjustBucketsPositions(count()-1);
+        bucket->setVerticalIndex(count()-1); // 已经添加了，下标索引要-1
+        if (count())
+            bucket->move(buckets.last()->geometry().topLeft());
     }
     else // 插入到中间
     {
         buckets.insert(index, bucket);
-        adjustBucketsPositions(index);
+        for (int i = index; i < count(); i++)
+            buckets.at(i)->setVerticalIndex(i);
+        if (index+1 < count())
+            bucket->move(buckets.at(index+1)->geometry().topLeft());
+        else if (index > 0)
+            bucket->move(buckets.at(index-1)->geometry().topLeft());
     }
 
-    bucket->setVerticalIndex(count()-1); // 已经添加了，下标索引要-1
-    bucket->adjustWidgetsPositions();
+    bucket->show();
 
     // 设置item的尺寸
     connect(bucket, &TimelineBucket::signalSizeHintChanged, this, [=](QSize size){
@@ -42,7 +53,7 @@ TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int 
     });
 
     // 连接事件信号
-    connect(bucket, &TimelineBucket::signalBucketWidgetClicked, this, [=]{ slotBucketWidgetClicked(bucket); });
+    connect(bucket, &TimelineBucket::signalBucketWidgetPressed, this, [=]{ slotBucketWidgetToSelect(bucket); });
     connect(bucket, SIGNAL(signalTimeWidgetClicked(TimelineTimeLabel*)), this, SLOT(slotTimeWidgetClicked(TimelineTimeLabel*)));
     connect(bucket, SIGNAL(signalTextWidgetClicked(TimelineTextLabel*)), this, SLOT(slotTextWidgetClicked(TimelineTextLabel*)));
     connect(bucket, SIGNAL(signalTimeWidgetDoubleClicked(TimelineTimeLabel*)), this, SLOT(slotTimeWidgetDoubleClicked(TimelineTimeLabel*)));
@@ -52,7 +63,6 @@ TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int 
         slotDroppedAndMoved(from_bucket, bucket);
     });
 
-    updateUI();
     return bucket;
 }
 
@@ -62,6 +72,8 @@ void TimelineWidget::removeItem(int index)
         return ;
 
     buckets.takeAt(index)->deleteLater();
+
+    adjustBucketsPositionsWithAnimation(index);
 }
 
 void TimelineWidget::clearAll()
@@ -99,6 +111,7 @@ void TimelineWidget::setCurrentItem(int row, bool multi)
         unselectAll();
     buckets.at(row)->setSelected(true);
     current_index = row;
+    selected_buckets.append(buckets.at(row));
 }
 
 void TimelineWidget::setCurrentItem(TimelineBucket *bucket, bool multi)
@@ -107,6 +120,7 @@ void TimelineWidget::setCurrentItem(TimelineBucket *bucket, bool multi)
         unselectAll();
     bucket->setSelected(true);
     current_index = buckets.indexOf(bucket);
+    selected_buckets.append(bucket);
 }
 
 /**
@@ -175,7 +189,7 @@ void TimelineWidget::fromString(QString string, QString time_reg, QString para_s
             time = rx.cap(1);
 
             // 删除时间标记
-            QRegExp ex(time_total+"[\\s　]+");
+            QRegExp ex(time_total+"[\\s　]*");
             line.replace(ex, "");
         }
         texts = line.split(para_split);
@@ -218,7 +232,7 @@ void TimelineWidget::updateUI()
     setStyleSheet(style);
 }
 
-void TimelineWidget::slotBucketWidgetClicked(TimelineBucket *bucket)
+void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
 {
     if (!bucket->isSelected())
     {
@@ -356,6 +370,7 @@ void TimelineWidget::actionInsertAbove()
     if (current_index == -1)
         return ;
     setCurrentItem(insertItem("时间节点", QStringList{""}, current_index));
+    adjustBucketsPositionsWithAnimation(current_index);
 }
 
 void TimelineWidget::actionInsertUnder()
@@ -363,6 +378,7 @@ void TimelineWidget::actionInsertUnder()
     if (current_index == -1)
         return ;
     setCurrentItem(insertItem("时间节点", QStringList{""}, current_index+1));
+    adjustBucketsPositionsWithAnimation(current_index);
 }
 
 void TimelineWidget::actionDeleteLine()
@@ -370,6 +386,7 @@ void TimelineWidget::actionDeleteLine()
     if (current_index == -1)
         return ;
     removeItem(current_index);
+    adjustBucketsPositionsWithAnimation(current_index);
 }
 
 void TimelineWidget::actionCopyText()

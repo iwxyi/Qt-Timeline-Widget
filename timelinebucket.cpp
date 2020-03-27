@@ -314,6 +314,7 @@ bool TimelineBucket::isSelected()
 void TimelineBucket::setSelected(bool select)
 {
     this->selecting = select;
+    repaint();
 }
 
 void TimelineBucket::showEvent(QShowEvent *event)
@@ -330,6 +331,12 @@ void TimelineBucket::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setPen(QPen(QColor(0, 0, 200, 126)));
     int y = leading_dot->geometry().center().y();
+
+    // 画选中情况
+    if (selecting)
+    {
+        painter.fillRect(QRect(0,0,width(),height()), QColor(102, 255, 230, 30));
+    }
 
     // 画时间轴的线
     int left = padding_left + leading_dot_radius*2;
@@ -374,6 +381,7 @@ void TimelineBucket::mousePressEvent(QMouseEvent *event)
     {
         press_pos = event->pos();
     }
+    emit signalBucketWidgetPressed();
 
     QWidget::mousePressEvent(event);
 }
@@ -490,7 +498,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
                 text_widgets.removeAt(from_index);
                 text_widgets.insert(to_index, widget);
             }
-            update();
+            repaint();
             adjustWidgetsPositionsWithAnimation();
         }
     }

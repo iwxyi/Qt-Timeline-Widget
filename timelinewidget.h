@@ -44,7 +44,7 @@ signals:
 
 public slots:
     void updateUI();
-    void slotBucketWidgetClicked(TimelineBucket* bucket);
+    void slotBucketWidgetToSelect(TimelineBucket* bucket);
     void slotTimeWidgetClicked(TimelineTimeLabel* label);
     void slotTextWidgetClicked(TimelineTextLabel* label);
     void slotTimeWidgetDoubleClicked(TimelineTimeLabel* label);
