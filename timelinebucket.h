@@ -26,6 +26,7 @@ public:
     void setText(int index, QString text);
     void setText(QString text);
     void setText(QStringList texts);
+    TimelineTextLabel *insertText(int index, QString text = "");
     QString getText(int index);
 
     void clearText();
@@ -37,7 +38,7 @@ public:
     void adjustBucketSize();
     QSize getSuitableSize();
     void adjustWidgetsPositions(int start = 0);
-    void adjustWidgetsPositionWithAnimation(int start = 0, int end = -1);
+    void adjustWidgetsPositionsWithAnimation(int start = 0, int end = -1);
 
     bool isSelected();
     void setSelected(bool select);
@@ -57,7 +58,8 @@ protected:
     void dropEvent(QDropEvent *event) override;
 
 private:
-    void addTextWidget(QString text = "");
+    TimelineTextLabel *addTextWidget(QString text = "");
+    TimelineTextLabel *insertTextWidget(QString text = "", int index = -1);
     void connectWidgetEvent(TimelineTextLabel* label);
     bool canDropMimeData(QDropEvent* event);
 

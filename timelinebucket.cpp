@@ -47,7 +47,10 @@ void TimelineBucket::setText(int index, QString text)
     if (index < 0 || index > text_widgets.size()) // 错误
         return ;
     if (index == text_widgets.size()) // 加一个
-        return addTextWidget(text);
+    {
+        addTextWidget(text);
+        return ;
+    }
 
     // 设置内容
     text_widgets.at(index)->setText(text);
@@ -56,15 +59,16 @@ void TimelineBucket::setText(int index, QString text)
 
 void TimelineBucket::setText(QString text)
 {
-    this->clearText();
+    clearText();
     addTextWidget(text);
+
     adjustWidgetsSize();
     adjustWidgetsPositions();
 }
 
 void TimelineBucket::setText(QStringList texts)
 {
-    this->clearText();
+    clearText();
     foreach (QString text, texts)
     {
         addTextWidget(text);
@@ -74,6 +78,11 @@ void TimelineBucket::setText(QStringList texts)
     adjustWidgetsPositions();
 }
 
+TimelineTextLabel* TimelineBucket::insertText(int index, QString text)
+{
+    return insertTextWidget(text, index);
+}
+
 QString TimelineBucket::getText(int index)
 {
     if (index < 0 || index >= text_widgets.size())
@@ -81,15 +90,36 @@ QString TimelineBucket::getText(int index)
     return text_widgets.at(index)->text();
 }
 
-void TimelineBucket::addTextWidget(QString text)
+TimelineTextLabel* TimelineBucket::addTextWidget(QString text)
+{
+    return insertTextWidget(text, -1);
+}
+
+TimelineTextLabel* TimelineBucket::insertTextWidget(QString text, int index)
 {
     TimelineTextLabel* label = new TimelineTextLabel(this);
     label->setText(text);
     label->adjustSize(false);
-    text_widgets.append(label);
+    if (index > -1)
+    {
+        if (index > 0)
+            label->move(text_widgets.at(index-1)->geometry().topRight());
+        else if (index < text_widgets.size())
+            label->move(text_widgets.at(index)->geometry().topLeft());
+        text_widgets.insert(index, label);
+    }
+    else // index <= -1
+    {
+        text_widgets.append(label);
+        if (text_widgets.size())
+            label->move(text_widgets.last()->geometry().topRight());
+        else
+            label->move(time_widget->geometry().topRight());
+    }
     label->show();
 
     connectWidgetEvent(label);
+    return label;
 }
 
 void TimelineBucket::connectWidgetEvent(TimelineTextLabel *label)
@@ -113,7 +143,7 @@ void TimelineBucket::connectWidgetEvent(TimelineTextLabel *label)
         int index = text_widgets.indexOf(label);
         text_widgets.takeAt(index)->deleteLater();
         adjustBucketSize();
-        adjustWidgetsPositionWithAnimation(index);
+        adjustWidgetsPositionsWithAnimation(index);
     });
     connect(label, &TimelineTextLabel::signalSizeChanged, this, [=](QSize size) {
         adjustWidgetsPositions();
@@ -126,7 +156,8 @@ void TimelineBucket::actionInsertLeft(TimelineTextLabel *label)
     if (index == -1)
         return ;
 
-
+    insertTextWidget("", index);
+    adjustWidgetsPositionsWithAnimation(index);
 }
 
 void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
@@ -135,8 +166,8 @@ void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
     if (index == -1)
         return ;
 
-
-
+    insertTextWidget("", index+1);
+    adjustWidgetsPositionsWithAnimation(index+1);
 }
 
 void TimelineBucket::actionDelete(TimelineTextLabel *label)
@@ -144,13 +175,17 @@ void TimelineBucket::actionDelete(TimelineTextLabel *label)
     int index = text_widgets.indexOf(label);
     if (index == -1)
         return ;
+    text_widgets.takeAt(index)->deleteLater();
 
-
+    adjustWidgetsPositionsWithAnimation(index);
 }
 
 void TimelineBucket::actionMoveTextLabel(int from, int to)
 {
+    auto widget = text_widgets.takeAt(from);
+    text_widgets.insert(to, widget);
 
+    adjustWidgetsPositionsWithAnimation(qMin(from, to));
 }
 
 void TimelineBucket::clearText()
@@ -244,7 +279,7 @@ void TimelineBucket::adjustWidgetsPositions(int start)
 /**
  * 调整所有控件的位置，包含动画
  */
-void TimelineBucket::adjustWidgetsPositionWithAnimation(int start, int end)
+void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
 {
     setMinimumSize(getSuitableSize());
     int mid_y = height() / 2;
@@ -456,7 +491,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
                 text_widgets.insert(to_index, widget);
             }
             update();
-            adjustWidgetsPositionWithAnimation();
+            adjustWidgetsPositionsWithAnimation();
         }
     }
 
