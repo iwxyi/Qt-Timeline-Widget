@@ -84,7 +84,7 @@ void TimelineTextLabel::slotMenuShowed(const QPoint &pos)
     QMenu* menu = new QMenu("菜单", this);
     QAction* insert_left_action = new QAction("左边插入文字节点", this);
     QAction* insert_right_action = new QAction("右边插入文字节点", this);
-    QAction* delete_action = new QAction("删除", this);
+    QAction* delete_action = new QAction("删除节点", this);
     QAction* copy_text_action = new QAction("复制节点文字", this);
     menu->addAction(insert_left_action);
     menu->addAction(insert_right_action);

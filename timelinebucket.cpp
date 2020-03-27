@@ -5,6 +5,7 @@ TimelineBucket::TimelineBucket(QWidget *parent) : QWidget(parent)
     setAcceptDrops(true);
 
     selecting = false;
+    current_index = -1;
 
     initView();
 }
@@ -248,7 +249,7 @@ QSize TimelineBucket::getSuitableSize()
     {
         if (sh < text_widgets.at(i)->height())
             sh = text_widgets.at(i)->height();
-        sw += horizone_spacing + text_widgets.at(i)->width();
+        sw += text_widgets.at(i)->width();
     }
     sw += horizone_spacing * (text_widgets.size()+1);
     sh += vertical_spacing;
@@ -423,7 +424,7 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
             QDrag* drag = new QDrag(this);
             drag->setMimeData(mime);
             drag->setHotSpot(event->pos()); // 好像没什么用
-            QPixmap pixmap(size());
+            QPixmap pixmap(getSuitableSize());
             pixmap.fill(Qt::transparent);
             render(&pixmap);
             drag->setPixmap(pixmap);

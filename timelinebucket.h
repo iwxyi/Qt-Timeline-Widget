@@ -94,6 +94,7 @@ private:
 
     QPoint press_pos;
     bool selecting;
+    int current_index;
 };
 
 #endif // TIMELINEBUCKET_H
