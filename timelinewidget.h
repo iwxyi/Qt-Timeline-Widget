@@ -10,6 +10,7 @@
 #include <QDrag>
 #include <QPropertyAnimation>
 #include <QScrollArea>
+#include <QScrollBar>
 #include "timelinebucket.h"
 
 class TimelineWidget : public QScrollArea
@@ -31,6 +32,7 @@ public:
     void unselectItem(TimelineBucket* bucket);
     void setCurrentItem(int row, bool multi = false);
     void setCurrentItem(TimelineBucket* bucket, bool multi = false);
+    void scrollTo(int index = -1);
 
     void adjustBucketsPositions(int start = -1);
     void adjustBucketsPositionsWithAnimation(int start = 0, int end = -1);
@@ -57,6 +59,7 @@ public slots:
     void slotDroppedAndMoved(TimelineBucket* from, TimelineBucket* to);
 
     void actionAddText();
+    void actionAddLine();
     void actionInsertAbove();
     void actionInsertUnder();
     void actionDeleteLine();

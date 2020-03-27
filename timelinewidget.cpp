@@ -31,6 +31,8 @@ TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int 
     bucket->adjustWidgetsPositions();
     if (index < 0 || index >= count()) // 添加到末尾
     {
+        if (count() >= 1)
+            bucket->move(buckets.last()->pos());
         buckets.append(bucket);
         bucket->setVerticalIndex(count()-1); // 已经添加了，下标索引要-1
         if (count())
@@ -134,6 +136,29 @@ void TimelineWidget::setCurrentItem(TimelineBucket *bucket, bool multi)
         unselectAll();
     selectItem(bucket);
     current_index = buckets.indexOf(bucket);
+}
+
+/**
+ * 确保某个bucket可视
+ */
+void TimelineWidget::scrollTo(int index)
+{
+    if (index == -1)
+        index = current_index;
+    if (index == -1)
+        return ;
+    auto bucket = buckets.at(index);
+    int h = bucket->height();
+    int top = bucket->pos().y();
+    int bottom = bucket->geometry().bottom();
+    if (top - h < verticalScrollBar()->sliderPosition()) // 在上面
+    {
+        verticalScrollBar()->setSliderPosition(top - h);
+    }
+    else if (bottom + h > verticalScrollBar()->sliderPosition() + verticalScrollBar()->pageStep()) // 在下面
+    {
+        verticalScrollBar()->setSliderPosition(bottom + h - verticalScrollBar()->pageStep());
+    }
 }
 
 /**
@@ -267,6 +292,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
             if (modifiers == Qt::NoModifier) // 上移选中项
             {
                 setCurrentItem(current_index-1);
+                scrollTo();
                 return ;
             }
             else if (modifiers == Qt::ShiftModifier) // 上移并选中/取消你
@@ -280,6 +306,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 }
                 else
                     setCurrentItem(current_index-1, true);
+                scrollTo();
                 return ;
             }
         }
@@ -290,6 +317,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
             if (modifiers == Qt::NoModifier) // 下移选中项
             {
                 setCurrentItem(current_index+1);
+                scrollTo();
                 return ;
             }
             else if (modifiers == Qt::ShiftModifier) // 下移并选中/取消
@@ -303,6 +331,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 }
                 else
                     setCurrentItem(current_index+1, true);
+                scrollTo();
                 return ;
             }
         }
@@ -316,6 +345,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 setCurrentItem(index, true);
                 index--;
             }
+            scrollTo();
             return ;
         }
         break;
@@ -328,6 +358,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 setCurrentItem(index, true);
                 index++;
             }
+            scrollTo();
             return ;
         }
         break;
@@ -335,12 +366,24 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
         actionDeleteLine();
         return ;
     case Qt::Key_Insert:
-        break;
-    case Qt::Key_Tab:
-        break;
+        actionInsertAbove();
+        return ;
     case Qt::Key_Escape:
+        if (current_index > -1)
+        {
+            if (selected_buckets.size() > 1)
+                setCurrentItem(current_index);
+            else if (selected_buckets.size())
+                unselectItem(buckets.at(current_index));
+            return ;
+        }
         break;
     case Qt::Key_A:
+        if (modifiers == Qt::ControlModifier)
+        {
+            selectAll();
+            return ;
+        }
         break;
     }
     QScrollArea::keyPressEvent(event);
@@ -467,11 +510,13 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
 {
     QMenu* menu = new QMenu("菜单", this);
     QAction* add_text_action = new QAction("添加文字节点", this);
+    QAction* add_line_action = new QAction("添加新行", this);
     QAction* insert_above_action = new QAction("上方插入行", this);
     QAction* insert_under_action = new QAction("下方插入行", this);
     QAction* delete_line_action = new QAction("删除行", this);
     QAction* copy_text_action = new QAction("复制文字", this);
     menu->addAction(add_text_action);
+    menu->addAction(add_line_action);
     menu->addAction(insert_above_action);
     menu->addAction(insert_under_action);
     menu->addAction(delete_line_action);
@@ -489,6 +534,7 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
 
     // 设置事件
     connect(add_text_action, SIGNAL(triggered()), this, SLOT(actionAddText()));
+    connect(add_line_action, SIGNAL(triggered()), this, SLOT(actionAddLine()));
     connect(insert_above_action, SIGNAL(triggered()), this, SLOT(actionInsertAbove()));
     connect(insert_under_action, SIGNAL(triggered()), this, SLOT(actionInsertUnder()));
     connect(delete_line_action, SIGNAL(triggered()), this, SLOT(actionDeleteLine()));
@@ -534,6 +580,13 @@ void TimelineWidget::actionAddText()
             bucket->insertText(-1, "");
         }
     }
+}
+
+void TimelineWidget::actionAddLine()
+{
+    addItem("时间节点", "");
+    setCurrentItem(count()-1);
+    scrollTo();
 }
 
 void TimelineWidget::actionInsertAbove()
