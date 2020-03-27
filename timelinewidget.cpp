@@ -255,6 +255,97 @@ QString TimelineWidget::toString(QString time_format, QString para_split, QStrin
     return result;
 }
 
+void TimelineWidget::keyPressEvent(QKeyEvent *event)
+{
+    auto modifiers = event->modifiers();
+    auto key = event->key();
+    switch (key)
+    {
+    case Qt::Key_Up:
+        if (current_index > 0)
+        {
+            if (modifiers == Qt::NoModifier) // 上移选中项
+            {
+                setCurrentItem(current_index-1);
+                return ;
+            }
+            else if (modifiers == Qt::ShiftModifier) // 上移并选中/取消你
+            {
+                auto bucket = buckets.at(current_index);
+                auto bucket_up = buckets.at(current_index-1);
+                if (bucket->isSelected() && bucket_up->isSelected())
+                {
+                    unselectItem(bucket);
+                    current_index--;
+                }
+                else
+                    setCurrentItem(current_index-1, true);
+                return ;
+            }
+        }
+        break;
+    case Qt::Key_Down:
+        if (current_index > -1 && current_index < count()-1)
+        {
+            if (modifiers == Qt::NoModifier) // 下移选中项
+            {
+                setCurrentItem(current_index+1);
+                return ;
+            }
+            else if (modifiers == Qt::ShiftModifier) // 下移并选中/取消
+            {
+                auto bucket = buckets.at(current_index);
+                auto bucket_down = buckets.at(current_index+1);
+                if (bucket->isSelected() && bucket_down->isSelected())
+                {
+                    unselectItem(bucket);
+                    current_index++;
+                }
+                else
+                    setCurrentItem(current_index+1, true);
+                return ;
+            }
+        }
+        break;
+    case Qt::Key_Home:
+        if (current_index > 0 && modifiers == Qt::ShiftModifier)
+        {
+            int index = current_index;
+            while (index >= 0)
+            {
+                setCurrentItem(index, true);
+                index--;
+            }
+            return ;
+        }
+        break;
+    case Qt::Key_End:
+        if (current_index > -1 && modifiers == Qt::ShiftModifier)
+        {
+            int index = current_index;
+            while (index < count())
+            {
+                setCurrentItem(index, true);
+                index++;
+            }
+            return ;
+        }
+        break;
+    case Qt::Key_Delete:
+        actionDeleteLine();
+        return ;
+    case Qt::Key_Insert:
+        break;
+    case Qt::Key_Tab:
+        break;
+    case Qt::Key_Escape:
+        break;
+    case Qt::Key_A:
+        break;
+    }
+    QScrollArea::keyPressEvent(event);
+}
+
 TimelineBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
 {
     TimelineBucket* bucket = new TimelineBucket(center_widget);

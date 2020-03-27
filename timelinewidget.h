@@ -39,6 +39,7 @@ public:
     QString toString(QString time_format = "【%1】", QString para_split = "\n", QString line_split = "\n\n");
 
 protected:
+    void keyPressEvent(QKeyEvent* event) override;
 
 private:
     TimelineBucket *createItemWidget(QString time, QStringList texts);
