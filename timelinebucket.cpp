@@ -161,6 +161,16 @@ void TimelineBucket::clearText()
     text_widgets.clear();
 }
 
+QString TimelineBucket::toString(QString time_format, QString para_split)
+{
+    QString result = QString(time_format).arg(time_widget->text());
+    foreach (auto widget, text_widgets)
+    {
+        result += para_split + widget->text();
+    }
+    return toString();
+}
+
 void TimelineBucket::setTimeLabelWidth(int w)
 {
     time_widget->setFixedWidth(w);

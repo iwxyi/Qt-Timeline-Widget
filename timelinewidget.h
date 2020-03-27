@@ -21,6 +21,7 @@ public:
     TimelineBucket* addItem(QString time, QStringList texts);
     TimelineBucket* insertItem(QString time, QStringList texts, int index = -1);
     void removeItem(int index);
+    void clearAll();
     int count();
 
     void selectAll();
@@ -30,6 +31,9 @@ public:
 
     void adjustBucketsPositions(int start = -1);
     void adjustBucketsPositionsWithAnimation(int start = 0, int end = -1);
+
+    void fromString(QString string, QString time_reg = "【%1】", QString para_split = "\n", QString line_split = "\n\n");
+    QString toString(QString time_format = "【%1】", QString para_split = "\n", QString line_split = "\n\n");
 
 protected:
 

@@ -64,6 +64,14 @@ void TimelineWidget::removeItem(int index)
     buckets.takeAt(index)->deleteLater();
 }
 
+void TimelineWidget::clearAll()
+{
+    while (buckets.size())
+    {
+        buckets.takeFirst()->deleteLater();
+    }
+}
+
 int TimelineWidget::count()
 {
     return buckets.size();
@@ -142,6 +150,57 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
         }
         top += bucket->height();
     }
+}
+
+/**
+ * 从字符串中读取
+ * @param string      带格式的字符串
+ * @param time_format 获取时间正则表达式，以第一个括号确定（不要带有 ^ $ 标记！）
+ * @param para_split  时间节点内分段格式
+ * @param line_split  时间节点之间分段格式
+ */
+void TimelineWidget::fromString(QString string, QString time_reg, QString para_split, QString line_split)
+{
+    clearAll();
+    QStringList lines = string.split(line_split);
+    foreach (QString line, lines)
+    {
+        QString time_total, time; // 带格式的时间字符串、纯时间字符串
+        QStringList texts;
+        QRegExp rx(time_reg);
+        int pos = rx.indexIn(line);
+        if (pos != -1)
+        {
+            time_total = rx.cap(0);
+            time = rx.cap(1);
+
+            // 删除时间标记
+            QRegExp ex(time_total+"[\\s　]+");
+            line.replace(ex, "");
+        }
+        texts = line.split(para_split);
+
+        addItem(time, texts);
+    }
+}
+
+/**
+ * 将时间轴转换成带分段格式的字符串
+ * @param time_format 时间格式，以 %1 确定
+ * @param para_split  同一时间节点内分段格式
+ * @param line_split  时间节点之间的分段格式
+ * @return 所有字符串
+ */
+QString TimelineWidget::toString(QString time_format, QString para_split, QString line_split)
+{
+    QString result;
+    foreach (auto bucket, buckets)
+    {
+        if (!result.isEmpty())
+            result += line_split;
+        result += bucket->toString(time_format, para_split);
+    }
+    return result;
 }
 
 TimelineBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)

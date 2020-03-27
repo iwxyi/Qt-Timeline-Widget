@@ -30,6 +30,8 @@ public:
 
     void clearText();
 
+    QString toString(QString time_format = "【%1】", QString para_split = "\n");
+
     void setTimeLabelWidth(int w);
     void adjustWidgetsSize();
     void adjustBucketSize();
