@@ -26,7 +26,7 @@ void TimelineBucket::initView()
         emit signalTimeWidgetDoubleClicked(time_widget);
     });
     connect(time_widget, &TimelineTimeLabel::signalSizeChanged, this, [=](QSize size) { // 一般由 setTime 触发
-        adjustWidgetsPositions();
+        adjustWidgetsPositionsWithAnimation();
     });
 }
 
@@ -146,7 +146,8 @@ void TimelineBucket::connectWidgetEvent(TimelineTextLabel *label)
         adjustWidgetsPositionsWithAnimation(index);
     });
     connect(label, &TimelineTextLabel::signalSizeChanged, this, [=](QSize size) {
-        adjustWidgetsPositions();
+        // 一般由 setText(index, text) 触发，调整内容时文本框大小改变
+        adjustWidgetsPositionsWithAnimation();
     });
 }
 

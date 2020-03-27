@@ -9,9 +9,10 @@
 #include <QMimeData>
 #include <QDrag>
 #include <QPropertyAnimation>
+#include <QScrollArea>
 #include "timelinebucket.h"
 
-class TimelineWidget : public QWidget
+class TimelineWidget : public QScrollArea
 {
     Q_OBJECT
 public:
@@ -58,6 +59,7 @@ public slots:
     void actionCopyText();
 
 private:
+    QWidget* center_widget;
     QList<TimelineBucket*> buckets;
     QList<TimelineBucket*> selected_buckets;
     int current_index;

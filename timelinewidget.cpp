@@ -1,12 +1,14 @@
 #include "timelinewidget.h"
 
-TimelineWidget::TimelineWidget(QWidget *parent) : QWidget(parent)
+TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
 {
     setAcceptDrops(true);
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 
     current_index = -1;
+    center_widget = new QWidget(this);
+    setWidget(center_widget);
 
     updateUI();
 }
@@ -130,12 +132,21 @@ void TimelineWidget::adjustBucketsPositions(int start)
 {
     int end = count();
     int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
+    int max_width = 0;
     for (int i = start; i < end; i++)
     {
         TimelineBucket* bucket = buckets.at(i);
+        if (max_width < bucket->width())
+            max_width = bucket->width();
         bucket->move(bucket->pos().x(), top);
         top += bucket->height();
     }
+    int height = 0;
+    if (buckets.size())
+        height = top + buckets.last()->height();
+    else
+        height = 50;
+    center_widget->resize(max_width, height);
 }
 
 /**
@@ -149,9 +160,12 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     else
         end++;
     int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
+    int max_width = 0;
     for (int i = start; i < end; i++)
     {
         TimelineBucket* bucket = buckets.at(i);
+        if (max_width < bucket->width())
+            max_width = bucket->width();
         if (top != bucket->pos().y())
         {
             QPropertyAnimation* ani = new QPropertyAnimation(bucket, "pos");
@@ -164,6 +178,19 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
         }
         top += bucket->height();
     }
+
+    // 这句会在启动时触发 signalSizeHintChanged，但是必须需要啊
+    foreach (auto bucket, buckets)
+    {
+        bucket->resize(max_width, bucket->height());
+    }
+
+    int height = 0;
+    if (buckets.size())
+        height = top + buckets.last()->height();
+    else
+        height = 50;
+    center_widget->resize(max_width, height);
 }
 
 /**
@@ -219,7 +246,7 @@ QString TimelineWidget::toString(QString time_format, QString para_split, QStrin
 
 TimelineBucket *TimelineWidget::createItemWidget(QString time, QStringList texts)
 {
-    TimelineBucket* bucket = new TimelineBucket(this);
+    TimelineBucket* bucket = new TimelineBucket(center_widget);
     bucket->setTime(time);
     bucket->setText(texts);
     return bucket;
@@ -306,6 +333,7 @@ void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
     if (!ok)
         return ;
     label->setText(text);
+    label->adjustSize();
 }
 
 void TimelineWidget::slotMenuShowed(const QPoint &pos)
@@ -313,11 +341,18 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     QMenu* menu = new QMenu("菜单", this);
     QAction* insert_above_action = new QAction("上方插入行", this);
     QAction* insert_under_action = new QAction("下方插入行", this);
+    QAction* move_up_action = new QAction("上移行", this);
+    QAction* move_down_action = new QAction("下移行", this);
     QAction* delete_line_action = new QAction("删除行", this);
     QAction* copy_text_action = new QAction("复制文字", this);
+    menu->addSection("布局");
     menu->addAction(insert_above_action);
     menu->addAction(insert_under_action);
+    menu->addAction(move_up_action);
+    menu->addAction(move_down_action);
     menu->addAction(delete_line_action);
+    menu->addSeparator();
+    menu->addSection("数据");
     menu->addAction(copy_text_action);
 
     if (current_index == -1)
