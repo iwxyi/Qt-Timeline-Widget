@@ -64,6 +64,7 @@ void TimelineTimeLabel::slotMenuShowed(const QPoint& pos)
     connect(current_time_action, &QAction::triggered, this, [=] {
         QString str = QDate::currentDate().toString("yyyy.MM.dd");
         setText(str);
+        adjustSize();
     });
 
     menu->exec(QCursor::pos());

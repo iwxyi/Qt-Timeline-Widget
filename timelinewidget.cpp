@@ -107,22 +107,33 @@ void TimelineWidget::unselectAll()
     selected_buckets.clear();
 }
 
+void TimelineWidget::selectItem(TimelineBucket *bucket)
+{
+    bucket->setSelected(true);
+    if (!selected_buckets.contains(bucket))
+        selected_buckets.append(bucket);
+}
+
+void TimelineWidget::unselectItem(TimelineBucket *bucket)
+{
+    bucket->setSelected(false);
+    selected_buckets.removeOne(bucket);
+}
+
 void TimelineWidget::setCurrentItem(int row, bool multi)
 {
     if (!multi)
         unselectAll();
-    buckets.at(row)->setSelected(true);
+    selectItem(buckets.at(row));
     current_index = row;
-    selected_buckets.append(buckets.at(row));
 }
 
 void TimelineWidget::setCurrentItem(TimelineBucket *bucket, bool multi)
 {
     if (!multi)
         unselectAll();
-    bucket->setSelected(true);
+    selectItem(bucket);
     current_index = buckets.indexOf(bucket);
-    selected_buckets.append(bucket);
 }
 
 /**
@@ -261,13 +272,16 @@ void TimelineWidget::updateUI()
 
 void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
 {
-    if (!bucket->isSelected())
+    if (QApplication::keyboardModifiers() == Qt::NoModifier) // 没有修饰符，单选
     {
         setCurrentItem(bucket);
     }
     else if (QApplication::keyboardModifiers() == Qt::ControlModifier) // 按下 ctrl
     {
-        setCurrentItem(bucket, true);
+        if (!bucket->isSelected())
+            setCurrentItem(bucket, true);
+        else
+            unselectItem(bucket);
     }
     else if (QApplication::keyboardModifiers() == Qt::ShiftModifier) // 按下 shift
     {
@@ -277,25 +291,47 @@ void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
         {
             if (prev < curr)
             {
+                // 判断是否已经全选
+                bool has_unselect = false;
+                for (int i = prev; i <= curr; i++)
+                {
+                    if (!buckets.at(i)->isSelected())
+                    {
+                        has_unselect = true;
+                        break;
+                    }
+                }
+
+                // 再次遍历，如果有没有选择的，则选择；否则取消选择
                 for (int i = prev; i <= curr; i++)
                 {
                     TimelineBucket* bucket = buckets[i];
-                    if (!bucket->isSelected())
+                    if (bucket->isSelected() != has_unselect)
                     {
                         selected_buckets.append(bucket);
-                        bucket->setSelected(true);
+                        bucket->setSelected(has_unselect);
                     }
                 }
             }
-            else if (prev < curr)
+            else if (prev > curr)
             {
+                bool has_unselect = false;
+                for (int i = prev; i >= curr; i--)
+                {
+                    if (!buckets.at(i)->isSelected())
+                    {
+                        has_unselect = true;
+                        break;
+                    }
+                }
+
                 for (int i = prev; i >= curr; i--)
                 {
                     TimelineBucket* bucket = buckets[i];
-                    if (!bucket->isSelected())
+                    if (bucket->isSelected() != has_unselect)
                     {
                         selected_buckets.append(bucket);
-                        bucket->setSelected(true);
+                        bucket->setSelected(has_unselect);
                     }
                 }
             }
