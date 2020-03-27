@@ -53,6 +53,7 @@ public slots:
     void slotMenuShowed(const QPoint& pos);
     void slotDroppedAndMoved(TimelineBucket* from, TimelineBucket* to);
 
+    void actionAddText();
     void actionInsertAbove();
     void actionInsertUnder();
     void actionDeleteLine();

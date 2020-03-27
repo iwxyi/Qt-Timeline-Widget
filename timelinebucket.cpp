@@ -80,7 +80,9 @@ void TimelineBucket::setText(QStringList texts)
 
 TimelineTextLabel* TimelineBucket::insertText(int index, QString text)
 {
-    return insertTextWidget(text, index);
+    auto widget = insertTextWidget(text, index);
+    adjustWidgetsPositionsWithAnimation();
+    return widget;
 }
 
 QString TimelineBucket::getText(int index)
@@ -100,6 +102,7 @@ TimelineTextLabel* TimelineBucket::insertTextWidget(QString text, int index)
     TimelineTextLabel* label = new TimelineTextLabel(this);
     label->setText(text);
     label->adjustSize(false);
+
     if (index > -1)
     {
         if (index > 0)
@@ -111,8 +114,10 @@ TimelineTextLabel* TimelineBucket::insertTextWidget(QString text, int index)
     else // index <= -1
     {
         text_widgets.append(label);
-        if (text_widgets.size())
-            label->move(text_widgets.last()->geometry().topRight());
+        if (text_widgets.size()>1)
+        {
+            label->move(text_widgets.at(text_widgets.size()-2)->geometry().topRight());
+        }
         else
             label->move(time_widget->geometry().topRight());
     }
@@ -204,7 +209,7 @@ QString TimelineBucket::toString(QString time_format, QString para_split)
     {
         result += para_split + widget->text();
     }
-    return toString();
+    return result;
 }
 
 void TimelineBucket::setTimeLabelWidth(int w)

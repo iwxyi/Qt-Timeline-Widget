@@ -146,7 +146,7 @@ void TimelineWidget::adjustBucketsPositions(int start)
         height = top + buckets.last()->height();
     else
         height = 50;
-    center_widget->resize(max_width, height);
+//    center_widget->resize(max_width, height);
 }
 
 /**
@@ -339,24 +339,21 @@ void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
 void TimelineWidget::slotMenuShowed(const QPoint &pos)
 {
     QMenu* menu = new QMenu("菜单", this);
+    QAction* add_text_action = new QAction("添加文字节点", this);
     QAction* insert_above_action = new QAction("上方插入行", this);
     QAction* insert_under_action = new QAction("下方插入行", this);
-    QAction* move_up_action = new QAction("上移行", this);
-    QAction* move_down_action = new QAction("下移行", this);
     QAction* delete_line_action = new QAction("删除行", this);
     QAction* copy_text_action = new QAction("复制文字", this);
-    menu->addSection("布局");
+    menu->addAction(add_text_action);
     menu->addAction(insert_above_action);
     menu->addAction(insert_under_action);
-    menu->addAction(move_up_action);
-    menu->addAction(move_down_action);
     menu->addAction(delete_line_action);
     menu->addSeparator();
-    menu->addSection("数据");
     menu->addAction(copy_text_action);
 
     if (current_index == -1)
     {
+        add_text_action->setEnabled(false);
         insert_above_action->setEnabled(false);
         insert_under_action->setEnabled(false);
         delete_line_action->setEnabled(false);
@@ -364,6 +361,7 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     }
 
     // 设置事件
+    connect(add_text_action, SIGNAL(triggered()), this, SLOT(actionAddText()));
     connect(insert_above_action, SIGNAL(triggered()), this, SLOT(actionInsertAbove()));
     connect(insert_under_action, SIGNAL(triggered()), this, SLOT(actionInsertUnder()));
     connect(delete_line_action, SIGNAL(triggered()), this, SLOT(actionDeleteLine()));
@@ -400,6 +398,14 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
     adjustBucketsPositionsWithAnimation(qMin(from_index, to_index));
 }
 
+void TimelineWidget::actionAddText()
+{
+    if (current_index == -1)
+        return ;
+    auto bucket = buckets.at(current_index);
+    bucket->insertText(-1, "");
+}
+
 void TimelineWidget::actionInsertAbove()
 {
     if (current_index == -1)
@@ -422,9 +428,13 @@ void TimelineWidget::actionDeleteLine()
         return ;
     removeItem(current_index);
     adjustBucketsPositionsWithAnimation(current_index);
+    current_index = -1;
 }
 
 void TimelineWidget::actionCopyText()
 {
-
+    if (current_index == -1)
+        return ;
+    auto bucket = buckets.at(current_index);
+    QApplication::clipboard()->setText(bucket->toString());
 }
