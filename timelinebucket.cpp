@@ -386,8 +386,13 @@ void TimelineBucket::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         press_pos = event->pos();
+        emit signalBucketWidgetPressed();
     }
-    emit signalBucketWidgetPressed();
+    else if (event->button() == Qt::RightButton)
+    {
+        if (!isSelected())
+            emit signalBucketWidgetPressed();
+    }
 
     QWidget::mousePressEvent(event);
 }

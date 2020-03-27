@@ -436,41 +436,70 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
 
 void TimelineWidget::actionAddText()
 {
-    if (current_index == -1)
-        return ;
-    auto bucket = buckets.at(current_index);
-    bucket->insertText(-1, "");
+    foreach (auto bucket, buckets)
+    {
+        if (bucket->isSelected())
+        {
+            bucket->insertText(-1, "");
+        }
+    }
 }
 
 void TimelineWidget::actionInsertAbove()
 {
-    if (current_index == -1)
-        return ;
-    setCurrentItem(insertItem("时间节点", QStringList{""}, current_index));
-    adjustBucketsPositionsWithAnimation(current_index);
+    QList<TimelineBucket*> adds;
+    for (int i = count()-1; i>= 0; i--)
+    {
+        if (buckets.at(i)->isSelected())
+        {
+            adds.append(insertItem("时间节点", QStringList{""}, i));
+        }
+    }
+    unselectAll();
+    selected_buckets = adds;
+    foreach (auto bucket, selected_buckets)
+        bucket->setSelected(true);
+    adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineWidget::actionInsertUnder()
 {
-    if (current_index == -1)
-        return ;
-    setCurrentItem(insertItem("时间节点", QStringList{""}, current_index+1));
-    adjustBucketsPositionsWithAnimation(current_index);
+    QList<TimelineBucket*> adds;
+    for (int i = count()-1; i>= 0; i--)
+    {
+        if (buckets.at(i)->isSelected())
+        {
+            adds.append(insertItem("时间节点", QStringList{""}, i+1));
+        }
+    }
+    unselectAll();
+    selected_buckets = adds;
+    foreach (auto bucket, selected_buckets)
+        bucket->setSelected(true);
+    adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineWidget::actionDeleteLine()
 {
-    if (current_index == -1)
-        return ;
-    removeItem(current_index);
-    adjustBucketsPositionsWithAnimation(current_index);
+    for (int i = count()-1; i >= 0; i--)
+    {
+        if (buckets.at(i)->isSelected())
+            removeItem(i);
+    }
+    selected_buckets.clear();
+    adjustBucketsPositionsWithAnimation();
     current_index = -1;
 }
 
 void TimelineWidget::actionCopyText()
 {
-    if (current_index == -1)
-        return ;
-    auto bucket = buckets.at(current_index);
-    QApplication::clipboard()->setText(bucket->toString());
+    QString result;
+    foreach (auto bucket, buckets)
+    {
+        if (bucket->isSelected())
+        {
+            result += bucket->toString();
+        }
+    }
+    QApplication::clipboard()->setText(result);
 }
