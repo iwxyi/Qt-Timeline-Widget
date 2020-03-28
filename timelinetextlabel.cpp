@@ -82,12 +82,27 @@ void TimelineTextLabel::mouseMoveEvent(QMouseEvent *event)
         {
             QMimeData* mime = new QMimeData();
             mime->setData(TIMELINE_TEXT_MIME_KEY, QString::number(reinterpret_cast<int>(this)).toUtf8());
+            mime->setText(this->text());
             QDrag* drag = new QDrag(this);
             drag->setMimeData(mime);
             drag->setHotSpot(event->pos()); // 好像没什么用
             QPixmap pixmap(size());
             pixmap.fill(Qt::transparent);
             render(&pixmap);
+            {
+                // 保存临时文件
+                QString path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+                QString text = this->text();
+                text.replace("\\", "").replace("/", "").replace(":", "").replace("*", "").replace("?", "").replace("\"", "")
+                        .replace("<", "").replace(">", "").replace("|", "");
+                if (text.isEmpty())
+                    text = "未定";
+                else if (text.length() > 8)
+                    text = text.left(8);
+                path += "/"+text+".png";
+                pixmap.save(path);
+                mime->setUrls(QList<QUrl>{QUrl("file:///" + path)});
+            }
             drag->setPixmap(pixmap);
             drag->exec(Qt::MoveAction);
             return event->accept();

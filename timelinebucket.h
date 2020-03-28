@@ -8,6 +8,7 @@
 #include <QMimeData>
 #include <QDrag>
 #include <QPropertyAnimation>
+#include <QStandardPaths>
 #include "timelinetimelabel.h"
 #include "timelinetextlabel.h"
 #include "timelineleadingdot.h"

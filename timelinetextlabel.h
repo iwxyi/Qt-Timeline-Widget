@@ -13,6 +13,7 @@
 #include <QMimeData>
 #include <QDrag>
 #include <cmath>
+#include <QStandardPaths>
 
 #define TIMELINE_TEXT_MIME_KEY "TIMELINE_TEXT_WIDGET"
 
