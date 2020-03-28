@@ -149,7 +149,7 @@ void TimelineBucket::connectWidgetEvent(TimelineTextLabel *label)
         int index = text_widgets.indexOf(label);
         text_widgets.takeAt(index)->deleteLater();
         adjustBucketSize();
-        adjustWidgetsPositionsWithAnimation(index);
+        adjustWidgetsPositionsWithAnimation();
     });
     connect(label, &TimelineTextLabel::signalSizeChanged, this, [=](QSize) {
         // 一般由 setText(index, text) 触发，调整内容时文本框大小改变
@@ -561,6 +561,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
                 emit label->signalDraggedToOut(); // 从父类那里删掉
 
                 text_widgets.insert(to_index, widget);
+                adjustBucketSize(); // 从其他bucket那里移动过来，需要手动更换位置
             }
             else // 自己的，删掉旧的
             {
