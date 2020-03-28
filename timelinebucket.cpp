@@ -534,7 +534,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
             TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
             emit signalDroppedAndMoved(bucket);
         }
-        else if (mime->hasFormat(TIMELINE_TEXT_MIME_KEY)) // 左右交换文字
+        else if (mime->hasFormat(TIMELINE_TEXT_MIME_KEY)) // 左右或者和其他bucket交换文字
         {
             TimelineTextLabel* label = reinterpret_cast<TimelineTextLabel*>(mime->data(TIMELINE_TEXT_MIME_KEY).toInt());
 
@@ -568,6 +568,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
                 text_widgets.removeAt(from_index);
                 text_widgets.insert(to_index, widget);
             }
+
             repaint();
             adjustWidgetsPositionsWithAnimation();
         }

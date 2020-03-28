@@ -204,6 +204,7 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     else
         end++;
     int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
+    int current_width = center_widget->width();
     int max_width = 0;
     for (int i = start; i < end; i++)
     {
@@ -224,9 +225,12 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     }
 
     // 这句会在启动时触发 signalSizeHintChanged，但是必须需要啊
-    foreach (auto bucket, buckets)
+    if (max_width != current_width)
     {
-        bucket->resize(max_width, bucket->height());
+        foreach (auto bucket, buckets)
+        {
+            bucket->resize(max_width, bucket->height());
+        }
     }
 
     int height = 0;
@@ -515,6 +519,7 @@ void TimelineWidget::slotTimeWidgetDoubleClicked(TimelineTimeLabel *label)
         return ;
     label->setText(text);
     label->adjustSize();
+    adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
@@ -526,6 +531,7 @@ void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
         return ;
     label->setText(text);
     label->adjustSize();
+    adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineWidget::slotMenuShowed(const QPoint &pos)

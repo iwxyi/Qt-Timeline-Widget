@@ -29,7 +29,7 @@ void TimelineTextLabel::adjustSize(bool notify)
         else
         {
             // 选择合适的比例
-            int line_count = sqrt(qMax(total_width / line_height / 5, 1));
+            int line_count =static_cast<int>(sqrt(qMax(total_width / line_height / 5, 1)));
             int text_width = (total_width + line_count - 1) / line_count;
             setMinimumWidth(text_width + 20); // padding=10
         }
