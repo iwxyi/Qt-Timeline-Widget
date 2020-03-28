@@ -26,7 +26,7 @@ void TimelineBucket::initView()
     connect(time_widget, &TimelineTimeLabel::signalDoubleClicked, this, [=] {
         emit signalTimeWidgetDoubleClicked(time_widget);
     });
-    connect(time_widget, &TimelineTimeLabel::signalSizeChanged, this, [=](QSize size) { // 一般由 setTime 触发
+    connect(time_widget, &TimelineTimeLabel::signalSizeChanged, this, [=](QSize) { // 一般由 setTime 触发
         adjustWidgetsPositionsWithAnimation();
     });
 }
@@ -151,7 +151,7 @@ void TimelineBucket::connectWidgetEvent(TimelineTextLabel *label)
         adjustBucketSize();
         adjustWidgetsPositionsWithAnimation(index);
     });
-    connect(label, &TimelineTextLabel::signalSizeChanged, this, [=](QSize size) {
+    connect(label, &TimelineTextLabel::signalSizeChanged, this, [=](QSize) {
         // 一般由 setText(index, text) 触发，调整内容时文本框大小改变
         adjustBucketSize();
         adjustWidgetsPositionsWithAnimation();
@@ -324,6 +324,19 @@ void TimelineBucket::setSelected(bool select)
 {
     this->selecting = select;
     repaint();
+
+    QPropertyAnimation* ani = new QPropertyAnimation(this, "water_prop");
+    ani->setStartValue(water_prop);
+    ani->setEndValue( select ? 100 : 0 );
+    ani->setEasingCurve(QEasingCurve::OutQuad);
+    ani->setDuration(300);
+    connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+    ani->start();
+}
+
+void TimelineBucket::setPressPos(QPoint pos)
+{
+    water_source = pos;
 }
 
 void TimelineBucket::showEvent(QShowEvent *event)
@@ -342,9 +355,32 @@ void TimelineBucket::paintEvent(QPaintEvent *event)
     int y = leading_dot->geometry().center().y();
 
     // 画选中情况
-    if (selecting)
+    if (water_prop == 0)
     {
-        painter.fillRect(QRect(0,0,width(),height()), QColor(102, 255, 230, 30));
+
+    }
+    else if (water_prop == 100)
+    {
+        painter.fillRect(QRect(0,0,width(),height()), select_color);
+    }
+    else // 1 ~ 99
+    {
+        if (water_source == QPoint(-1, -1)) // 不知位置，直接渐变
+        {
+            QColor c = select_color;
+            c.setAlpha(select_color.alpha() * water_prop / 100);
+            painter.fillRect(QRect(0,0,width(),height()), c);
+        }
+        else // 画水波纹动画
+        {
+            int w_max = qMax(water_source.x(), width() - water_source.y());
+            int h_max = qMax(water_source.y(), height() - water_source.y());
+            int r_max = qMax(w_max, h_max);
+            int radius = r_max * water_prop / 100;
+            QPainterPath path;
+            path.addEllipse(water_source.x() - radius, water_source.y() - radius, radius*2, radius*2);
+            painter.fillPath(path, select_color);
+        }
     }
 
     // 画时间轴的线
@@ -388,7 +424,8 @@ void TimelineBucket::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
-        press_pos = event->pos();
+        water_source = press_pos = event->pos();
+        water_prop = 0;
         emit signalBucketWidgetPressed();
     }
     else if (event->button() == Qt::RightButton)
@@ -469,7 +506,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
     const QMimeData* mime = event->mimeData();
     if (event->source() == this) // 内部拖拽
     {
-        ; // 经常触发的自己拖拽给自己，无视
+        // 经常触发的自己拖拽给自己，无视
     }
     else // 外部拖拽，交换顺序/移动数据
     {
@@ -536,4 +573,15 @@ bool TimelineBucket::canDropMimeData(QDropEvent *event)
         return true;
     }
     return false;
+}
+
+int TimelineBucket::getWaterProp()
+{
+    return water_prop;
+}
+
+void TimelineBucket::setWaterProp(int p)
+{
+    water_prop = p;
+    update();
 }

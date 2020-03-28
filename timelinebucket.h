@@ -17,6 +17,7 @@
 class TimelineBucket : public QWidget
 {
     Q_OBJECT
+    Q_PROPERTY(int water_prop READ getWaterProp WRITE setWaterProp)
 public:
     TimelineBucket(QWidget *parent = nullptr);
     void initView();
@@ -42,6 +43,7 @@ public:
 
     bool isSelected();
     void setSelected(bool select);
+    void setPressPos(QPoint pos = QPoint(-1, -1));
 
 protected:
     void showEvent(QShowEvent* event) override;
@@ -62,6 +64,9 @@ private:
     TimelineTextLabel *insertTextWidget(QString text = "", int index = -1);
     void connectWidgetEvent(TimelineTextLabel* label);
     bool canDropMimeData(QDropEvent* event);
+
+    int getWaterProp();
+    void setWaterProp(int p);
 
 signals:
     void signalSizeHintChanged(QSize size);
@@ -95,6 +100,10 @@ private:
     QPoint press_pos;
     bool selecting;
     int current_index;
+
+    QColor select_color = QColor(102, 255, 230, 64);
+    QPoint water_source; // 水波纹动画开始的位置
+    int water_prop;      // 水波纹动画进度（1—100）
 };
 
 #endif // TIMELINEBUCKET_H
