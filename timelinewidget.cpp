@@ -95,7 +95,15 @@ int TimelineWidget::count()
 
 void TimelineWidget::selectAll()
 {
+    int left = horizontalScrollBar()->sliderPosition(),
+            right = horizontalScrollBar()->sliderPosition() + horizontalScrollBar()->pageStep();
+    bool odd = true;
     foreach (TimelineBucket* bucket, buckets) {
+        if (odd)
+            bucket->setPressPos(QPoint(left, bucket->height()/2));
+        else
+            bucket->setPressPos(QPoint(right, bucket->height()/2));
+        odd = !odd;
         bucket->setSelected(true);
     }
     selected_buckets = buckets;
@@ -291,6 +299,8 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
         {
             if (modifiers == Qt::NoModifier) // 上移选中项
             {
+                auto bucket = buckets.at(current_index-1);
+                bucket->setPressPos(QPoint(qMin(bucket->width(), horizontalScrollBar()->pageStep()), bucket->height()));
                 setCurrentItem(current_index-1);
                 scrollTo();
                 return ;
@@ -305,7 +315,10 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                     current_index--;
                 }
                 else
+                {
+                    bucket_up->setPressPos(QPoint(qMin(bucket_up->width(), horizontalScrollBar()->pageStep()), bucket_up->height()));
                     setCurrentItem(current_index-1, true);
+                }
                 scrollTo();
                 return ;
             }
@@ -316,6 +329,8 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
         {
             if (modifiers == Qt::NoModifier) // 下移选中项
             {
+                auto bucket = buckets.at(current_index+1);
+                bucket->setPressPos(QPoint(qMin(bucket->width(), horizontalScrollBar()->pageStep()), 0));
                 setCurrentItem(current_index+1);
                 scrollTo();
                 return ;
@@ -330,7 +345,10 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                     current_index++;
                 }
                 else
+                {
+                    bucket_down->setPressPos(QPoint(qMin(bucket_down->width(), horizontalScrollBar()->pageStep()), 0));
                     setCurrentItem(current_index+1, true);
+                }
                 scrollTo();
                 return ;
             }

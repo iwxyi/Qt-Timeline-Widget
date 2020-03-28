@@ -365,7 +365,7 @@ void TimelineBucket::paintEvent(QPaintEvent *event)
     }
     else // 1 ~ 99
     {
-        if (water_source == QPoint(-1, -1)) // 不知位置，直接渐变
+        if (!selecting || water_source == QPoint(-1, -1)) // 不知位置，直接渐变
         {
             QColor c = select_color;
             c.setAlpha(select_color.alpha() * water_prop / 100);
@@ -425,7 +425,8 @@ void TimelineBucket::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         water_source = press_pos = event->pos();
-        water_prop = 0;
+        if (water_prop != 100) // 如果已经选中了，就不重新刷新了
+            water_prop = 0;
         emit signalBucketWidgetPressed();
     }
     else if (event->button() == Qt::RightButton)
