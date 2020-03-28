@@ -466,14 +466,13 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
             drag->setMimeData(mime);
             drag->setHotSpot(event->pos()); // 好像没什么用
             QPixmap pixmap(getSuitableSize());
-            pixmap.fill(Qt::transparent);
-            bool prev_water_prop = water_prop;
-            water_prop = 0;
-            repaint();
-            render(&pixmap);
-            water_prop = prev_water_prop;
-            repaint();
+
             {
+                water_prop = 0; // 画未选中的
+                repaint();
+                pixmap.fill(Qt::transparent);
+                render(&pixmap);
+
                 // 保存临时文件
                 QString path = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
                 QString time = time_widget->text();
@@ -485,7 +484,15 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
                 pixmap.save(path);
                 mime->setUrls(QList<QUrl>{QUrl("file:///" + path)});
             }
-            drag->setPixmap(pixmap);
+
+            {
+                water_prop = 100; // 画选中的
+                repaint();
+                pixmap.fill(Qt::transparent);
+                render(&pixmap);
+                drag->setPixmap(pixmap);
+            }
+
             drag->exec(Qt::MoveAction);
             return event->accept();
         }
