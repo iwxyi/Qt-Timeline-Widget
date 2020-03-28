@@ -395,6 +395,10 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 unselectItem(buckets.at(current_index));
             return ;
         }
+        else
+        {
+            unselectAll();
+        }
         break;
     case Qt::Key_A:
         if (modifiers == Qt::ControlModifier)
