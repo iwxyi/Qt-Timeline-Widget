@@ -16,9 +16,6 @@ MainWindow::MainWindow(QWidget *parent)
             sl << ("文本"+QString::number(rand()%90000+10000));
         ui->widget->addItem("2020.3."+QString::number(i), sl/*QStringList{QString::number(i)}*/);
     }
-
-    // Label 换行测试
-    ui->label->setText("哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈");
 }
 
 MainWindow::~MainWindow()

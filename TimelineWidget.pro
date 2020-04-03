@@ -15,24 +15,27 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += \
+    timeline/
+
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
     testlistwidget.cpp \
-    timelinebucket.cpp \
-    timelineleadingdot.cpp \
-    timelinetextlabel.cpp \
-    timelinetimelabel.cpp \
-    timelinewidget.cpp
+    timeline/timelinebucket.cpp \
+    timeline/timelineleadingdot.cpp \
+    timeline/timelinetextlabel.cpp \
+    timeline/timelinetimelabel.cpp \
+    timeline/timelinewidget.cpp
 
 HEADERS += \
     mainwindow.h \
     testlistwidget.h \
-    timelinebucket.h \
-    timelineleadingdot.h \
-    timelinetextlabel.h \
-    timelinetimelabel.h \
-    timelinewidget.h
+    timeline/timelinebucket.h \
+    timeline/timelineleadingdot.h \
+    timeline/timelinetextlabel.h \
+    timeline/timelinetimelabel.h \
+    timeline/timelinewidget.h
 
 FORMS += \
     mainwindow.ui
