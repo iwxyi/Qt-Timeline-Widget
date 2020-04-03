@@ -13,7 +13,19 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
     editing_bucket = nullptr;
     editing_label = nullptr;
     edit = new LabelEditor(center_widget);
-    connect(edit, SIGNAL(textChanged()), this, SLOT(slotEditChanged()));
+    connect(edit, &LabelEditor::textChanged, this, [=] {
+        if (editing_label == nullptr)
+                return ;
+        editing_label->setText(edit->toPlainText());
+//        if (editing_label->objectName() == "TimelineTextLabel") {
+//            static_cast<TimelineTextLabel>(editing_label).adjustSize(true, edit->toPlainText());
+//        } else {
+            editing_label->adjustSize();
+//        }
+        edit->move(editing_label->pos() + editing_label->parentWidget()->pos());
+        edit->resize(editing_label->size());
+        editing_bucket->adjustWidgetsPositions();
+    });
     connect(edit, &LabelEditor::signalEditCanceled, this, [=](QString origin) {
         if (editing_label == nullptr)
             return ;
@@ -657,11 +669,7 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
 
 void TimelineWidget::slotEditChanged()
 {
-    if (editing_label == nullptr)
-        return ;
-    editing_label->setText(edit->toPlainText());
-    editing_label->adjustSize();
-    edit->resize(editing_label->size());
+
 }
 
 void TimelineWidget::actionAddText()

@@ -15,24 +15,32 @@ TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another, QWidget *paren
     resize(another->size());
 }
 
-void TimelineTextLabel::adjustSize(bool notify)
+void TimelineTextLabel::adjustSize(bool notify, QString text)
 {
     QSize old_size = size();
+//    if (text.isEmpty())
+//        text = this->text();
     {
         QFontMetrics fm(this->font());
         int line_height = fm.lineSpacing();
-        int total_width = fm.horizontalAdvance(text());
+        int total_width = fm.horizontalAdvance(text);
         if (total_width <= 20)
         {
             setMinimumWidth(0);
+//            QLabel::adjustSize();
         }
         else
         {
             // 选择合适的比例
             int line_count =static_cast<int>(sqrt(qMax(total_width / line_height / 5, 1)));
             int text_width = (total_width + line_count - 1) / line_count;
+//            QRect rect = fm.boundingRect(QRect(0,0,text_width,0), Qt::TextWordWrap, text);
+//            qDebug() << line_count << text_width << rect.height();
             setMinimumWidth(text_width + 20); // padding=10
+//            resize(text_width+20, height());
+//            resize(rect.width(), rect.height()+20);
         }
+        qDebug() << "QLabel::adjustSize" << text;
         QLabel::adjustSize();
     }
 

@@ -24,7 +24,7 @@ public:
     TimelineTextLabel(QWidget* parent = nullptr);
     TimelineTextLabel(TimelineTextLabel*& another, QWidget* parent = nullptr);
 
-    void adjustSize(bool notify = true);
+    void adjustSize(bool notify = true, QString text = "");
 
     QPoint getGlobalPos();
 

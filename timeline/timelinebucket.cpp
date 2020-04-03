@@ -236,7 +236,8 @@ void TimelineBucket::adjustBucketSize()
 {
     QSize size = getSuitableSize();
     setMinimumSize(size);
-    resize(size);
+//    resize(size);
+    setFixedHeight(size.height());
     emit signalSizeHintChanged(size);
 }
 
@@ -291,9 +292,14 @@ void TimelineBucket::adjustWidgetsPositions(int start)
  */
 void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
 {
+    QSize old_size = size();
     QSize size = getSuitableSize();
-    setMinimumSize(size);
-    setFixedHeight(size.height());
+    if (size != old_size)
+    {
+        setMinimumSize(size);
+        setFixedHeight(size.height());
+        emit signalSizeHintChanged(size);
+    }
     int mid_y = height() / 2;
     leading_dot->move(padding_left, mid_y-leading_dot_radius);
     time_widget->move(leading_dot->geometry().right() + dot_time_spacing, mid_y - time_widget->height()/2);
