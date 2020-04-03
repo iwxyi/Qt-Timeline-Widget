@@ -471,7 +471,15 @@ void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
 {
     if (edit->isVisible())
     {
+        if (editing_label != nullptr)
+        {
+            editing_label->adjustSize();
+            editing_bucket->adjustWidgetsPositionsWithAnimation();
+            editing_label = nullptr;
+            editing_bucket = nullptr;
+        }
         edit->hide();
+        adjustBucketsPositionsWithAnimation();
     }
 
     if (QApplication::keyboardModifiers() == Qt::NoModifier) // 没有修饰符，单选

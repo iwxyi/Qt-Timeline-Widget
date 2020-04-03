@@ -40,7 +40,6 @@ void TimelineTextLabel::adjustSize(bool notify, QString text)
 //            resize(text_width+20, height());
 //            resize(rect.width(), rect.height()+20);
         }
-        qDebug() << "QLabel::adjustSize" << text;
         QLabel::adjustSize();
     }
 
