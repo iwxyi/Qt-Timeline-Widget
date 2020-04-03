@@ -22,8 +22,8 @@ class TimelineWidget : public QScrollArea
 public:
     TimelineWidget(QWidget *parent = nullptr);
 
-    TimelineBucket* addItem(QString time, QString text);
-    TimelineBucket* addItem(QString time, QStringList texts);
+    void addItem(QString time, QString text);
+    void addItem(QString time, QStringList texts);
     TimelineBucket* insertItem(QString time, QStringList texts, int index = -1);
     void removeItem(int index);
     void clearAll();
@@ -76,6 +76,7 @@ private:
     int current_index;
 
     LabelEditor* edit;
+    TimelineBucket* editing_bucket;
     QLabel* editing_label;
 };
 

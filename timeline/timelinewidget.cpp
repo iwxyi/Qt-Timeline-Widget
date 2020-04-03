@@ -10,21 +10,40 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
     center_widget = new QWidget(this);
     setWidget(center_widget);
 
+    editing_bucket = nullptr;
     editing_label = nullptr;
-    edit = new LabelEditor(this);
+    edit = new LabelEditor(center_widget);
     connect(edit, SIGNAL(textChanged()), this, SLOT(slotEditChanged()));
+    connect(edit, &LabelEditor::signalEditCanceled, this, [=](QString origin) {
+        if (editing_label == nullptr)
+            return ;
+        edit->setPlainText(origin); // 设置回初始内容
+        QTimer::singleShot(0, [=]{
+            editing_label = nullptr;
+            editing_bucket = nullptr;
+        });
+    });
+    connect(edit, &LabelEditor::signalEditFinished, this, [=](QString text) {
+        if (editing_label == nullptr) // 快速按下两次时会触发这个信号，而第一次已经使 editing_label = nullptr
+            return ;
+        editing_label->adjustSize();
+        editing_bucket->adjustWidgetsPositionsWithAnimation();
+        editing_label = nullptr;
+        editing_bucket = nullptr;
+        adjustBucketsPositionsWithAnimation();
+    });
     edit->hide();
 
     updateUI();
 }
 
-TimelineBucket *TimelineWidget::addItem(QString time, QString text)
+void TimelineWidget::addItem(QString time, QString text)
 {
     addItem(time, QStringList{text});
     adjustBucketsPositionsWithAnimation();
 }
 
-TimelineBucket *TimelineWidget::addItem(QString time, QStringList texts)
+void TimelineWidget::addItem(QString time, QStringList texts)
 {
     insertItem(time, texts, -1);
     adjustBucketsPositionsWithAnimation();
@@ -431,7 +450,8 @@ TimelineBucket *TimelineWidget::createItemWidget(QString time, QStringList texts
 void TimelineWidget::updateUI()
 {
     QString style = "#TimelineTimeLabel { background:white; border: 1px solid orange; border-radius: 5px; padding: 10px; }"
-            "#TimelineTextLabel { background:white; border: 1px solid blue; border-radius: 5px; padding:10px; }";
+            "#TimelineTextLabel { background:white; border: 1px solid blue; border-radius: 5px; padding: 10px; }"
+            "#TimelineEdit { background:white; border: 1px solid transparent; border-radius: 5px; padding: 5px; margin: 1px; margin-left: 4px;}";
     setStyleSheet(style);
 }
 
@@ -530,25 +550,44 @@ void TimelineWidget::slotTimeWidgetDoubleClicked(TimelineTimeLabel *label)
     label->setText(text);
     label->adjustSize();
     adjustBucketsPositionsWithAnimation();*/
+
     QTimer::singleShot(0, [=]{
+        editing_bucket = buckets.at(current_index);
         editing_label = label;
         edit->move(label->pos() + label->parentWidget()->pos());
         edit->setPlainText(label->text());
         edit->resize(label->size());
+        edit->setOriginText(label->text());
         edit->show();
+        edit->raise();
+        edit->setFocus();
+        edit->selectAll();
     });
 }
 
 void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
 {
-    QString text = label->text();
+    /*QString text = label->text();
     bool ok;
     text = QInputDialog::getText(this, "修改内容", "请输入新的内容", QLineEdit::Normal, text, &ok);
     if (!ok)
         return ;
     label->setText(text);
     label->adjustSize();
-    adjustBucketsPositionsWithAnimation();
+    adjustBucketsPositionsWithAnimation();*/
+
+    QTimer::singleShot(0, [=]{
+        editing_bucket = buckets.at(current_index);
+        editing_label = label;
+        edit->move(label->pos() + label->parentWidget()->pos());
+        edit->setPlainText(label->text());
+        edit->resize(label->size());
+        edit->setOriginText(label->text());
+        edit->show();
+        edit->raise();
+        edit->setFocus();
+        edit->selectAll();
+    });
 }
 
 void TimelineWidget::slotMenuShowed(const QPoint &pos)
