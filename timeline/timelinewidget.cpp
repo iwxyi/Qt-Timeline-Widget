@@ -36,13 +36,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
         });
     });
     connect(edit, &LabelEditor::signalEditFinished, this, [=](QString text) {
-        if (editing_label == nullptr) // 快速按下两次时会触发这个信号，而第一次已经使 editing_label = nullptr
-            return ;
-        editing_label->adjustSize();
-        editing_bucket->adjustWidgetsPositionsWithAnimation();
-        editing_label = nullptr;
-        editing_bucket = nullptr;
-        adjustBucketsPositionsWithAnimation();
+        hideEditing();
     });
     edit->hide();
 
@@ -471,15 +465,7 @@ void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
 {
     if (edit->isVisible())
     {
-        if (editing_label != nullptr)
-        {
-            editing_label->adjustSize();
-            editing_bucket->adjustWidgetsPositionsWithAnimation();
-            editing_label = nullptr;
-            editing_bucket = nullptr;
-        }
-        edit->hide();
-        adjustBucketsPositionsWithAnimation();
+        hideEditing();
     }
 
     if (QApplication::keyboardModifiers() == Qt::NoModifier) // 没有修饰符，单选
@@ -649,6 +635,7 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
 
 void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *to)
 {
+    hideEditing();
     int from_index = buckets.indexOf(from);
     int to_index = buckets.indexOf(to);
     if (from_index == to_index) // 很可能发生的自己和自己交换
@@ -678,6 +665,18 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
 void TimelineWidget::slotEditChanged()
 {
 
+}
+
+void TimelineWidget::hideEditing()
+{
+    edit->hide();
+    if (editing_label == nullptr) // 快速按下两次时会触发这个信号，而第一次已经使 editing_label = nullptr
+        return ;
+    editing_label->adjustSize();
+    editing_bucket->adjustWidgetsPositionsWithAnimation();
+    editing_label = nullptr;
+    editing_bucket = nullptr;
+    adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineWidget::actionAddText()
@@ -734,6 +733,7 @@ void TimelineWidget::actionInsertUnder()
 
 void TimelineWidget::actionDeleteLine()
 {
+    hideEditing();
     for (int i = count()-1; i >= 0; i--)
     {
         if (buckets.at(i)->isSelected())
