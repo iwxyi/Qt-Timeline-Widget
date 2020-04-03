@@ -322,6 +322,7 @@ void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
         ani->start();
         if (!firsted)
         {
+            // 在第一个控件的动画上连接信号槽，实时重绘
             connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
             firsted = true;
         }
