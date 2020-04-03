@@ -11,7 +11,10 @@
 #include <QPropertyAnimation>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QPlainTextEdit>
+#include <QTimer>
 #include "timelinebucket.h"
+#include "labeleditor.h"
 
 class TimelineWidget : public QScrollArea
 {
@@ -57,6 +60,7 @@ public slots:
     void slotTextWidgetDoubleClicked(TimelineTextLabel* label);
     void slotMenuShowed(const QPoint& pos);
     void slotDroppedAndMoved(TimelineBucket* from, TimelineBucket* to);
+    void slotEditChanged();
 
     void actionAddText();
     void actionAddLine();
@@ -70,6 +74,9 @@ private:
     QList<TimelineBucket*> buckets;
     QList<TimelineBucket*> selected_buckets;
     int current_index;
+
+    LabelEditor* edit;
+    QLabel* editing_label;
 };
 
 #endif // TIMELINEWIDGET_H

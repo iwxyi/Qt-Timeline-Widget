@@ -22,6 +22,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     testlistwidget.cpp \
+    timeline/labeleditor.cpp \
     timeline/timelinebucket.cpp \
     timeline/timelineleadingdot.cpp \
     timeline/timelinetextlabel.cpp \
@@ -31,6 +32,7 @@ SOURCES += \
 HEADERS += \
     mainwindow.h \
     testlistwidget.h \
+    timeline/labeleditor.h \
     timeline/timelinebucket.h \
     timeline/timelineleadingdot.h \
     timeline/timelinetextlabel.h \

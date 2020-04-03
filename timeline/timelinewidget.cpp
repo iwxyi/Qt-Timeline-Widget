@@ -10,6 +10,11 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
     center_widget = new QWidget(this);
     setWidget(center_widget);
 
+    editing_label = nullptr;
+    edit = new LabelEditor(this);
+    connect(edit, SIGNAL(textChanged()), this, SLOT(slotEditChanged()));
+    edit->hide();
+
     updateUI();
 }
 
@@ -432,6 +437,11 @@ void TimelineWidget::updateUI()
 
 void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
 {
+    if (edit->isVisible())
+    {
+        edit->hide();
+    }
+
     if (QApplication::keyboardModifiers() == Qt::NoModifier) // 没有修饰符，单选
     {
         setCurrentItem(bucket);
@@ -512,14 +522,21 @@ void TimelineWidget::slotTextWidgetClicked(TimelineTextLabel *label)
 
 void TimelineWidget::slotTimeWidgetDoubleClicked(TimelineTimeLabel *label)
 {
-    QString text = label->text();
+    /*QString text = label->text();
     bool ok;
     text = QInputDialog::getText(this, "修改时间", "请输入新的时间", QLineEdit::Normal, text, &ok);
     if (!ok)
         return ;
     label->setText(text);
     label->adjustSize();
-    adjustBucketsPositionsWithAnimation();
+    adjustBucketsPositionsWithAnimation();*/
+    QTimer::singleShot(0, [=]{
+        editing_label = label;
+        edit->move(label->pos() + label->parentWidget()->pos());
+        edit->setPlainText(label->text());
+        edit->resize(label->size());
+        edit->show();
+    });
 }
 
 void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
@@ -597,6 +614,15 @@ void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *t
     }
 
     adjustBucketsPositionsWithAnimation(qMin(from_index, to_index));
+}
+
+void TimelineWidget::slotEditChanged()
+{
+    if (editing_label == nullptr)
+        return ;
+    editing_label->setText(edit->toPlainText());
+    editing_label->adjustSize();
+    edit->resize(editing_label->size());
 }
 
 void TimelineWidget::actionAddText()
