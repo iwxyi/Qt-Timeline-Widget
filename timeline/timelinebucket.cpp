@@ -307,6 +307,7 @@ void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
     int left = (start-1)>=0 ? text_widgets.at(start-1)->geometry().right() : time_widget->geometry().right();
     if (end == -1)
         end = text_widgets.size();
+    bool firsted = false;
     for (int i = start; i < end; i++)
     {
         TimelineTextLabel* label = text_widgets.at(i);
@@ -319,6 +320,11 @@ void TimelineBucket::adjustWidgetsPositionsWithAnimation(int start, int end)
         ani->setEasingCurve(QEasingCurve::OutQuart);
         connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
         ani->start();
+        if (!firsted)
+        {
+            connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
+            firsted = true;
+        }
 
         left += label->width();
     }

@@ -9,6 +9,7 @@
 #include <QDrag>
 #include <QPropertyAnimation>
 #include <QStandardPaths>
+#include <QTimer>
 #include "timelinetimelabel.h"
 #include "timelinetextlabel.h"
 #include "timelineleadingdot.h"
