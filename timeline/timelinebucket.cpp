@@ -480,7 +480,7 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
             mime->setText(toString());
             QDrag* drag = new QDrag(this);
             drag->setMimeData(mime);
-            drag->setHotSpot(event->pos()); // 好像没什么用
+            drag->setHotSpot(event->pos()); // 设置拖拽缩略图与拖拽的点的相对位移
             QPixmap pixmap(getSuitableSize());
 
             {

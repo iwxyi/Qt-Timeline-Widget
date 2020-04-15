@@ -33,3 +33,4 @@ Qt 多列时间轴控件。
 ## 截图
 
 ![截图](pictures/picture.gif)
+
