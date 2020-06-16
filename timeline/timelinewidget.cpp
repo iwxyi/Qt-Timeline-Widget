@@ -3,9 +3,12 @@
 TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
 {
     setAcceptDrops(true);
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
     setContextMenuPolicy(Qt::CustomContextMenu);
+    setFocusPolicy(Qt::StrongFocus);
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 
+    _adusting_buckets_size = false;
     current_index = -1;
     center_widget = new QWidget(this);
     setWidget(center_widget);
@@ -34,9 +37,11 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
             editing_label = nullptr;
             editing_bucket = nullptr;
         });
+        this->setFocus();
     });
     connect(edit, &LabelEditor::signalEditFinished, this, [=](QString text) {
         hideEditing();
+        this->setFocus();
     });
     edit->hide();
 
@@ -83,7 +88,8 @@ TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int 
 
     // 设置item的尺寸
     connect(bucket, &TimelineBucket::signalSizeHintChanged, this, [=](QSize size){
-        adjustBucketsPositions(buckets.indexOf(bucket)+1);
+        if (!_adusting_buckets_size)
+            adjustBucketsPositions(buckets.indexOf(bucket));
     });
 
     // 连接事件信号
@@ -207,6 +213,9 @@ void TimelineWidget::adjustBucketsPositions(int start)
     int end = count();
     int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
     int max_width = 0;
+    int current_width = center_widget->width();
+    if (start > 0)
+        max_width = center_widget->width();
     for (int i = start; i < end; i++)
     {
         TimelineBucket* bucket = buckets.at(i);
@@ -215,12 +224,25 @@ void TimelineWidget::adjustBucketsPositions(int start)
         bucket->move(bucket->pos().x(), top);
         top += bucket->height();
     }
-    int height = 0;
-    if (buckets.size())
-        height = top + buckets.last()->height();
-    else
-        height = 50;
-//    center_widget->resize(max_width, height);
+
+    _adusting_buckets_size = true;
+    {
+        if (max_width != current_width)
+        {
+            foreach (auto bucket, buckets)
+            {
+                bucket->resize(max_width, bucket->height());
+            }
+        }
+
+        int height = 0;
+        if (buckets.size())
+            height = top + buckets.last()->height();
+        else
+            height = 50;
+        center_widget->resize(max_width, height);
+    }
+   _adusting_buckets_size = false;
 }
 
 /**
@@ -236,6 +258,8 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     int top = (start-1) >= 0 ? buckets.at(start-1)->geometry().bottom() : 0;
     int current_width = center_widget->width();
     int max_width = 0;
+    if (start > 0)
+        max_width = center_widget->width();
     for (int i = start; i < end; i++)
     {
         TimelineBucket* bucket = buckets.at(i);
@@ -255,51 +279,107 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     }
 
     // 这句会在启动时触发 signalSizeHintChanged，但是必须需要啊
-    if (max_width != current_width)
+    // _adusting_buckets_size = true;
     {
-        foreach (auto bucket, buckets)
+        if (max_width != current_width)
         {
-            bucket->resize(max_width, bucket->height());
+            foreach (auto bucket, buckets)
+            {
+                bucket->resize(max_width, bucket->height());
+            }
         }
-    }
 
-    int height = 0;
-    if (buckets.size())
-        height = top + buckets.last()->height();
-    else
-        height = 50;
-    center_widget->resize(max_width, height);
+        int height = 0;
+        if (buckets.size())
+            height = top + buckets.last()->height();
+        else
+            height = 50;
+        center_widget->resize(max_width, height);
+    }
+    // _adusting_buckets_size = false;
 }
 
 /**
  * 从字符串中读取
- * @param string      带格式的字符串
- * @param time_format 获取时间正则表达式，以第一个括号确定（不要带有 ^ $ 标记！）
- * @param para_split  时间节点内分段格式
- * @param line_split  时间节点之间分段格式
+ * @param string       带格式的字符串
+ * @param time_format  获取时间正则表达式，以第一个括号确定（不要带有 ^ $ 标记！）
+ * @param node_split   时间节点内分段格式
+ * @param nodes_split  时间节点之间分段格式
  */
-void TimelineWidget::fromString(QString string, QString time_reg, QString para_split, QString line_split)
+void TimelineWidget::fromString(QString string, QString time_reg, QString node_split, QString nodes_split)
 {
     clearAll();
-    QStringList lines = string.split(line_split);
-    foreach (QString line, lines)
+    if (node_split == nodes_split) // 分段符一致，以每一段的时间标记为准
     {
-        QString time_total, time; // 带格式的时间字符串、纯时间字符串
+        QString time, time_total;
         QStringList texts;
+
         QRegExp rx(time_reg);
-        int pos = rx.indexIn(line);
-        if (pos != -1)
+        rx.setMinimal(true);
+        
+        QStringList lines = string.split(nodes_split, QString::SkipEmptyParts);
+        for (int i = 0; i < lines.length(); i++)
         {
-            time_total = rx.cap(0);
-            time = rx.cap(1);
+            QString& line = lines[i];
+            int pos = rx.indexIn(line);
+            if (pos != -1) // 找到时间标记
+            {
+                // 添加上一个时间轴
+                if (time != nullptr || texts.length() > 0)
+                {
+                    addItem(time, texts);
+                    time = "";
+                    texts.clear();
+                }
+                
+                time_total = rx.cap(0);
+                time = rx.cap(1);
 
-            // 删除时间标记
-            QRegExp ex(time_total+"[\\s　]*");
-            line.replace(ex, "");
+                // 删除行内标记
+                QRegExp ex(time_total + "[\\s　]*");
+                line.replace(ex, "");
+                if (!line.trimmed().isEmpty()) // 这一段还有其他内容，继续便利
+                    i--;
+            }
+            else
+            {
+                texts.append(line.trimmed());
+            }
         }
-        texts = line.split(para_split);
+        if (time != nullptr || texts.length() > 0)
+        {
+            addItem(time, texts);
+            time = "";
+            texts.clear();
+        }
+    }
+    else // 根据分割来
+    {
+        QStringList lines = string.split(nodes_split, QString::SkipEmptyParts);
+        foreach (QString line, lines)
+        {
+            QString time_total, time; // 带格式的时间字符串、纯时间字符串
+            QStringList texts;
+            QRegExp rx(time_reg);
+            rx.setMinimal(true);
+            int pos = rx.indexIn(line);
+            if (pos != -1)
+            {
+                time_total = rx.cap(0);
+                time = rx.cap(1);
 
-        addItem(time, texts);
+                // 删除时间标记
+                QRegExp ex(time_total + "[\\s　]*");
+                line.replace(ex, "");
+            }
+            texts = line.split(node_split, QString::SkipEmptyParts);
+            for (int i = 0; i < texts.size(); i++)
+            {
+                texts[i] = texts[i].trimmed();
+            }
+
+            addItem(time, texts);
+        }
     }
 }
 
@@ -441,6 +521,21 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
             return ;
         }
         break;
+    case Qt::Key_C:
+        actionCopyText();
+        return ;
+    case Qt::Key_Tab:
+        actionAddText();
+        return ;
+    case Qt::Key_Enter:
+    case Qt::Key_Return:
+        if (modifiers == Qt::ShiftModifier)
+            actionInsertAbove();
+        else if (modifiers == Qt::ControlModifier)
+            actionAddLine();
+        else if (modifiers == Qt::NoModifier)
+            actionInsertUnder();
+        return ;
     }
     QScrollArea::keyPressEvent(event);
 }
@@ -667,6 +762,19 @@ void TimelineWidget::slotEditChanged()
 
 }
 
+/**
+ * 编辑某一个节点
+ * @param row 时间行
+ * @param col 改行第几项。0为时间，1开始为文字
+ */
+void TimelineWidget::slotEdit(int row, int col)
+{
+    if (row < 0 || row >= buckets.size())
+        return;
+    auto bucket = buckets.at(row);
+    bucket->edit(col);
+}
+
 void TimelineWidget::hideEditing()
 {
     edit->hide();
@@ -681,12 +789,24 @@ void TimelineWidget::hideEditing()
 
 void TimelineWidget::actionAddText()
 {
-    foreach (auto bucket, buckets)
+    int count = 0, first = -1;
+    for (int i = 0; i < buckets.size(); i++)
     {
+        auto bucket = buckets.at(i);
         if (bucket->isSelected())
         {
             bucket->insertText(-1, "");
+            count++;
+            if (first == -1)
+                first = i;
         }
+    }
+    if (count == 1 && first > -1)
+    {
+        // 等待动画结束，显示编辑框
+        QTimer::singleShot(300, [=]{
+            slotEdit(first, buckets.at(first)->count());
+        });
     }
 }
 

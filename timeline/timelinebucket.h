@@ -31,6 +31,8 @@ public:
     void setText(QStringList texts);
     TimelineTextLabel *insertText(int index, QString text = "");
     QString getText(int index);
+    int count();
+    void edit(int index);
 
     void clearText();
 
@@ -105,7 +107,7 @@ private:
 
     QColor select_color = QColor(102, 255, 230, 64);
     QPoint water_source; // 水波纹动画开始的位置
-    int water_prop;      // 水波纹动画进度（1—100）
+    int water_prop = 0;      // 水波纹动画进度（1—100）
 };
 
 #endif // TIMELINEBUCKET_H

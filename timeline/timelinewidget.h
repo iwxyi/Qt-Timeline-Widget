@@ -40,7 +40,7 @@ public:
     void adjustBucketsPositions(int start = -1);
     void adjustBucketsPositionsWithAnimation(int start = 0, int end = -1);
 
-    void fromString(QString string, QString time_reg = "【%1】", QString para_split = "\n", QString line_split = "\n\n");
+    void fromString(QString string, QString time_reg = "【(.*)】", QString node_split = "\n", QString nodes_split = "\n");
     QString toString(QString time_format = "【%1】", QString para_split = "\n", QString line_split = "\n\n");
 
 protected:
@@ -61,6 +61,7 @@ public slots:
     void slotMenuShowed(const QPoint& pos);
     void slotDroppedAndMoved(TimelineBucket* from, TimelineBucket* to);
     void slotEditChanged();
+    void slotEdit(int row, int col);
     void hideEditing();
 
     void actionAddText();
@@ -79,6 +80,8 @@ private:
     LabelEditor* edit;
     TimelineBucket* editing_bucket;
     QLabel* editing_label;
+    
+    bool _adusting_buckets_size; // 是否正在调整索引buckets大小（无视此时触发的sizeHintChanged信号）
 };
 
 #endif // TIMELINEWIDGET_H

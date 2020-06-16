@@ -93,6 +93,19 @@ QString TimelineBucket::getText(int index)
     return text_widgets.at(index)->text();
 }
 
+int TimelineBucket::count()
+{
+    return text_widgets.size();
+}
+
+void TimelineBucket::edit(int index)
+{
+    if (index == 0)
+        emit signalTimeWidgetDoubleClicked(time_widget);
+    else if (index > 0 && index <= text_widgets.size())
+        emit signalTextWidgetDoubleClicked(text_widgets.at(index-1));
+}
+
 TimelineTextLabel* TimelineBucket::addTextWidget(QString text)
 {
     return insertTextWidget(text, -1);
@@ -166,6 +179,7 @@ void TimelineBucket::actionInsertLeft(TimelineTextLabel *label)
 
     insertTextWidget("", index);
     adjustWidgetsPositionsWithAnimation(index);
+    adjustBucketSize();
 }
 
 void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
@@ -176,6 +190,7 @@ void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
 
     insertTextWidget("", index+1);
     adjustWidgetsPositionsWithAnimation(index+1);
+    adjustBucketSize();
 }
 
 void TimelineBucket::actionDelete(TimelineTextLabel *label)
@@ -186,6 +201,7 @@ void TimelineBucket::actionDelete(TimelineTextLabel *label)
     text_widgets.takeAt(index)->deleteLater();
 
     adjustWidgetsPositionsWithAnimation(index);
+    adjustWidgetsPositionsWithAnimation();
 }
 
 void TimelineBucket::actionMoveTextLabel(int from, int to)
@@ -236,7 +252,7 @@ void TimelineBucket::adjustBucketSize()
 {
     QSize size = getSuitableSize();
     setMinimumSize(size);
-//    resize(size);
+    //    resize(size);
     setFixedHeight(size.height());
     emit signalSizeHintChanged(size);
 }
@@ -444,6 +460,7 @@ void TimelineBucket::mousePressEvent(QMouseEvent *event)
         if (water_prop != 100) // 如果已经选中了，就不重新刷新了
             water_prop = 0;
         emit signalBucketWidgetPressed();
+        return event->accept();
     }
     else if (event->button() == Qt::RightButton)
     {
@@ -459,6 +476,7 @@ void TimelineBucket::mouseReleaseEvent(QMouseEvent *event)
     if ((press_pos-event->pos()).manhattanLength() < QApplication::startDragDistance())
     {
         emit signalBucketWidgetClicked();
+        return event->accept();
     }
 
     QWidget::mouseReleaseEvent(event);
@@ -476,11 +494,11 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
         if ((event->pos() - press_pos).manhattanLength() >= QApplication::startDragDistance())
         {
             QMimeData* mime = new QMimeData();
-            mime->setData(TIMELINE_BUCKET_MIME_KEY, QString::number(reinterpret_cast<int>(this)).toUtf8());
+            mime->setData(TIMELINE_BUCKET_MIME_KEY, QString::number(reinterpret_cast<qint64>(this)).toUtf8());
             mime->setText(toString());
             QDrag* drag = new QDrag(this);
             drag->setMimeData(mime);
-            drag->setHotSpot(event->pos()); // 设置拖拽缩略图与拖拽的点的相对位移
+            drag->setHotSpot(event->pos()); // 好像没什么用
             QPixmap pixmap(getSuitableSize());
 
             {
@@ -510,8 +528,8 @@ void TimelineBucket::mouseMoveEvent(QMouseEvent *event)
             }
 
             drag->exec(Qt::MoveAction);
-            return event->accept();
         }
+        return event->accept();
     }
 
     QWidget::mouseMoveEvent(event);
@@ -554,12 +572,12 @@ void TimelineBucket::dropEvent(QDropEvent *event)
     {
         if (mime->hasFormat(TIMELINE_BUCKET_MIME_KEY)) // 上下交换行
         {
-            TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toInt());
+            TimelineBucket* bucket = reinterpret_cast<TimelineBucket*>(mime->data(TIMELINE_BUCKET_MIME_KEY).toLongLong());
             emit signalDroppedAndMoved(bucket);
         }
         else if (mime->hasFormat(TIMELINE_TEXT_MIME_KEY)) // 左右或者和其他bucket交换文字
         {
-            TimelineTextLabel* label = reinterpret_cast<TimelineTextLabel*>(mime->data(TIMELINE_TEXT_MIME_KEY).toInt());
+            TimelineTextLabel* label = reinterpret_cast<TimelineTextLabel*>(mime->data(TIMELINE_TEXT_MIME_KEY).toLongLong());
 
             // 获取拖拽到目标的索引
             int to_index = text_widgets.size(); // 默认是到最后面

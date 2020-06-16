@@ -3,7 +3,7 @@
 LabelEditor::LabelEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
     setObjectName("TimelineEdit");
-    setMaximumBlockCount(1);
+    // setMaximumBlockCount(1); // 虽然很想加，但是会导致不能撤销……
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 }
 

@@ -35,7 +35,6 @@ void TimelineTextLabel::adjustSize(bool notify, QString text)
             int line_count =static_cast<int>(sqrt(qMax(total_width / line_height / 5, 1)));
             int text_width = (total_width + line_count - 1) / line_count;
 //            QRect rect = fm.boundingRect(QRect(0,0,text_width,0), Qt::TextWordWrap, text);
-//            qDebug() << line_count << text_width << rect.height();
             setMinimumWidth(text_width + 20); // padding=10
 //            resize(text_width+20, height());
 //            resize(rect.width(), rect.height()+20);
@@ -55,7 +54,9 @@ QPoint TimelineTextLabel::getGlobalPos()
 void TimelineTextLabel::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
+    {
         press_pos = event->pos();
+    }
     QLabel::mousePressEvent(event);
 }
 
@@ -67,6 +68,7 @@ void TimelineTextLabel::mouseReleaseEvent(QMouseEvent *event)
         {
             emit signalClicked();
         }
+        return event->accept();
     }
     QLabel::mouseReleaseEvent(event);
 }
@@ -76,6 +78,7 @@ void TimelineTextLabel::mouseDoubleClickEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         emit signalDoubleClicked();
+        return event->accept();
     }
 
     QLabel::mouseDoubleClickEvent(event);
@@ -88,7 +91,7 @@ void TimelineTextLabel::mouseMoveEvent(QMouseEvent *event)
         if ((event->pos() - press_pos).manhattanLength() >= QApplication::startDragDistance())
         {
             QMimeData* mime = new QMimeData();
-            mime->setData(TIMELINE_TEXT_MIME_KEY, QString::number(reinterpret_cast<int>(this)).toUtf8());
+            mime->setData(TIMELINE_TEXT_MIME_KEY, QString::number(reinterpret_cast<qint64>(this)).toUtf8());
             mime->setText(this->text());
             QDrag* drag = new QDrag(this);
             drag->setMimeData(mime);
@@ -112,8 +115,8 @@ void TimelineTextLabel::mouseMoveEvent(QMouseEvent *event)
             }
             drag->setPixmap(pixmap);
             drag->exec(Qt::MoveAction);
-            return event->accept();
         }
+        return event->accept();
     }
 
     QLabel::mouseMoveEvent(event);
