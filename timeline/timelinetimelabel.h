@@ -10,6 +10,7 @@
 #include <QAction>
 #include <QDate>
 #include <QMouseEvent>
+#include "timelineglobal.h"
 
 class TimelineTimeLabel : public QLabel
 {

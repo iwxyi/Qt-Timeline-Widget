@@ -28,7 +28,7 @@ void LabelEditor::keyPressEvent(QKeyEvent *event)
         this->hide();
         return ;
     }
-    else if (key == Qt::Key_Return || key == Qt::Key_Enter)
+    else if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Tab)
     {
         emit signalEditFinished(toPlainText());
         hide();

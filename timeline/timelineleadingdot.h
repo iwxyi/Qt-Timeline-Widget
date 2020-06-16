@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QPainter>
 #include <QDebug>
+#include "timelineglobal.h"
 
 class TimelineLeadingDot : public QWidget
 {

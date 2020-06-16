@@ -8,6 +8,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     srand(time(0));
 
+    (new TimelineUndoStack(ui->widget));
+
     for (int i = 0; i < 20; i++)
     {
         QStringList sl;

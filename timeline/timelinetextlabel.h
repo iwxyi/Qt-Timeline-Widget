@@ -14,6 +14,7 @@
 #include <QDrag>
 #include <cmath>
 #include <QStandardPaths>
+#include "timelineglobal.h"
 
 #define TIMELINE_TEXT_MIME_KEY "TIMELINE_TEXT_WIDGET"
 

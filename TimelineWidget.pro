@@ -24,9 +24,13 @@ SOURCES += \
     testlistwidget.cpp \
     timeline/labeleditor.cpp \
     timeline/timelinebucket.cpp \
+    timeline/timelineglobal.cpp \
     timeline/timelineleadingdot.cpp \
     timeline/timelinetextlabel.cpp \
     timeline/timelinetimelabel.cpp \
+    timeline/timelineundocommands.cpp \
+    timeline/timelineundostack.cpp \
+    timeline/timelineundovirtual.cpp \
     timeline/timelinewidget.cpp
 
 HEADERS += \
@@ -34,9 +38,13 @@ HEADERS += \
     testlistwidget.h \
     timeline/labeleditor.h \
     timeline/timelinebucket.h \
+    timeline/timelineglobal.h \
     timeline/timelineleadingdot.h \
     timeline/timelinetextlabel.h \
     timeline/timelinetimelabel.h \
+    timeline/timelineundocommands.h \
+    timeline/timelineundostack.h \
+    timeline/timelineundovirtual.h \
     timeline/timelinewidget.h
 
 FORMS += \
