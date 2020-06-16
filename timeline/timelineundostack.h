@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QUndoStack>
 #include "timelinewidget.h"
+#include "timelineundocommands.h"
 
 class TimelineUndoStack : public QUndoStack, public TimelineUndoVirtual
 {
