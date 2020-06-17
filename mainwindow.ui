@@ -14,9 +14,14 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,1">
     <item>
-     <widget class="TimelineWidget" name="widget" native="true"/>
+     <widget class="TimelineWidget" name="widget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+     </widget>
+    </item>
+    <item>
+     <widget class="QWidget" name="widget_2" native="true"/>
     </item>
    </layout>
   </widget>

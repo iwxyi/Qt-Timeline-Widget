@@ -19,6 +19,7 @@ INCLUDEPATH += \
     timeline/
 
 SOURCES += \
+    backpack/backpackwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     testlistwidget.cpp \
@@ -34,6 +35,7 @@ SOURCES += \
     timeline/timelinewidget.cpp
 
 HEADERS += \
+    backpack/backpackwidget.h \
     mainwindow.h \
     testlistwidget.h \
     timeline/labeleditor.h \
