@@ -262,6 +262,16 @@ void TimelineWidget::scrollTo(int index)
     }
 }
 
+QList<int> TimelineWidget::selectedIndexes() const
+{
+    int size = buckets.size();
+    QList<int> indexes;
+    for (int i = 0; i < size; i++)
+        if (buckets.at(i)->isSelected())
+            indexes << i;
+    return indexes;
+}
+
 void TimelineWidget::resetWidth()
 {
     _width_need_adjust = true;
@@ -370,7 +380,9 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
  */
 void TimelineWidget::fromString(QString string, QString time_reg, QString node_split, QString nodes_split)
 {
-    clearAll();
+    QList<QString> times;
+    QList<QStringList> textss;
+
     if (node_split == nodes_split) // 分段符一致，以每一段的时间标记为准
     {
         QString time, time_total;
@@ -389,7 +401,8 @@ void TimelineWidget::fromString(QString string, QString time_reg, QString node_s
                 // 添加上一个时间轴
                 if (time != nullptr || texts.length() > 0)
                 {
-                    addItem(time, texts);
+                    times.append(time);
+                    textss.append(texts);
                     time = "";
                     texts.clear();
                 }
@@ -410,7 +423,8 @@ void TimelineWidget::fromString(QString string, QString time_reg, QString node_s
         }
         if (time != nullptr || texts.length() > 0)
         {
-            addItem(time, texts);
+            times.append(time);
+            textss.append(texts);
             time = "";
             texts.clear();
         }
@@ -440,9 +454,16 @@ void TimelineWidget::fromString(QString string, QString time_reg, QString node_s
                 texts[i] = texts[i].trimmed();
             }
 
-            addItem(time, texts);
+            times.append(time);
+            textss.append(texts);
         }
     }
+
+    QList<int> indexs;
+    int c = count();
+    for (int i = 0; i < times.size(); i++)
+        indexs.append(c);
+    timeline_undos->addCommand(indexs, times, textss);
 }
 
 /**
@@ -755,6 +776,7 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     QAction* insert_under_action = new QAction("下方插入行", this);
     QAction* delete_line_action = new QAction("删除行", this);
     QAction* copy_text_action = new QAction("复制文字", this);
+    QAction* paste_action = new QAction("剪贴板导入", this);
     menu->addAction(add_text_action);
     menu->addAction(add_line_action);
     menu->addAction(insert_above_action);
@@ -762,6 +784,7 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     menu->addAction(delete_line_action);
     menu->addSeparator();
     menu->addAction(copy_text_action);
+    menu->addAction(paste_action);
 
     if (current_index == -1)
     {
@@ -779,6 +802,7 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
     connect(insert_under_action, SIGNAL(triggered()), this, SLOT(actionInsertUnder()));
     connect(delete_line_action, SIGNAL(triggered()), this, SLOT(actionDeleteLine()));
     connect(copy_text_action, SIGNAL(triggered()), this, SLOT(actionCopyText()));
+    connect(paste_action, SIGNAL(triggered()), this, SLOT(actionPaste()));
 
     menu->exec(QCursor::pos());
 }
@@ -848,10 +872,7 @@ void TimelineWidget::actionAddLine()
 
 void TimelineWidget::actionInsertAbove()
 {
-    QList<int> indexes;
-    for (int i = 0; i < count(); i++)
-        if (buckets.at(i)->isSelected())
-            indexes.append(i);
+    QList<int> indexes = selectedIndexes();
 
     timeline_undos->addCommand(indexes);
 
@@ -868,10 +889,7 @@ void TimelineWidget::actionInsertAbove()
 
 void TimelineWidget::actionInsertUnder()
 {
-    QList<int> indexes;
-    for (int i = 0; i < count(); i++)
-        if (buckets.at(i)->isSelected())
-            indexes.append(i+1);
+    QList<int> indexes = selectedIndexes();
 
     timeline_undos->addCommand(indexes);
 
@@ -890,10 +908,7 @@ void TimelineWidget::actionDeleteLine()
 {
     finishEditing();
 
-    QList<int> indexes;
-    for (int i = 0; i < count(); i++)
-        if (buckets.at(i)->isSelected())
-            indexes.append(i);
+    QList<int> indexes = selectedIndexes();
 
     timeline_undos->deleteCommand(indexes);
     selected_buckets.clear();
@@ -911,4 +926,20 @@ void TimelineWidget::actionCopyText()
         }
     }
     QApplication::clipboard()->setText(result);
+}
+
+void TimelineWidget::actionPaste()
+{
+    QString text = QApplication::clipboard()->text();
+    if (text.isEmpty())
+        return ;
+    int c = this->count();
+    fromString(text);
+    int c2 = this->count();
+    if (c == c2) // 没有变化
+        return ;
+    for (int i = c; i < c2; i++)
+        selectItem(at(i));
+    scrollTo(c2-1);
+    scrollTo(c);
 }

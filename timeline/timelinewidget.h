@@ -39,6 +39,7 @@ public:
     void setCurrentItem(int row, bool multi = false);
     void setCurrentItem(TimelineBucket* bucket, bool multi = false);
     void scrollTo(int index = -1);
+    QList<int> selectedIndexes() const;
 
     void resetWidth();
     void adjustBucketsPositions(int start = -1);
@@ -74,6 +75,7 @@ public slots:
     void actionInsertUnder();
     void actionDeleteLine();
     void actionCopyText();
+    void actionPaste();
 
 private:
     QWidget* center_widget;
