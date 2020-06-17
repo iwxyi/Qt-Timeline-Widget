@@ -18,6 +18,8 @@ public:
     virtual void addCommand(TimelineBucket* bucket, QList<int> indexes) override;
     virtual void deleteCommand(int index) override;
     virtual void deleteCommand(QList<int> indexes) override;
+    virtual void deleteCommand(TimelineBucket* bucket, int index) override;
+    virtual void deleteCommand(TimelineBucket* bucket, QList<int> indexes) override;
     virtual void moveCommand(int old_index, int new_index) override;
     virtual void moveCommand(TimelineBucket* bucket, int old_index, int new_index) override;
     virtual void moveCommand(TimelineBucket* old_bucket, TimelineBucket* new_bucket, int old_index, int new_index) override;

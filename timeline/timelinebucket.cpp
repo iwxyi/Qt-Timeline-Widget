@@ -123,15 +123,6 @@ int TimelineBucket::indexOf(TimelineTextLabel *label)
     return text_widgets.indexOf(label);
 }
 
-void TimelineBucket::moveTextLabel(int from_index, int to_index)
-{
-    auto widget = text_widgets.at(from_index);
-    text_widgets.removeAt(from_index);
-    text_widgets.insert(to_index, widget);
-
-    adjustWidgetsPositionsWithAnimation();
-}
-
 TimelineTextLabel *TimelineBucket::createTextLabel(const TimelineTextLabel *another, int index, QPoint pos)
 {
     auto widget = new TimelineTextLabel(another, this);
@@ -235,10 +226,8 @@ void TimelineBucket::actionDelete(TimelineTextLabel *label)
     int index = text_widgets.indexOf(label);
     if (index == -1)
         return ;
-    removeAt(index);
 
-    adjustWidgetsPositionsWithAnimation(index);
-    adjustWidgetsPositionsWithAnimation();
+    timeline_undos->deleteCommand(this, index);
 }
 
 void TimelineBucket::actionMoveTextLabel(int from, int to)

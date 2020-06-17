@@ -65,15 +65,17 @@ private:
 class TimelineBucketTextDeleteCommand : public QUndoCommand
 {
 public:
-    TimelineBucketTextDeleteCommand(TimelineBucket* bucket, TimelineTextLabel* label, int index, QUndoCommand* parent = nullptr);
+    TimelineBucketTextDeleteCommand(TimelineWidget* widget, int bucket_index, int index, QUndoCommand* parent = nullptr);
+    TimelineBucketTextDeleteCommand(TimelineWidget* widget, int bucket_index, QList<int> indexes, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
-    TimelineTextLabel* label;
-    int index;
+    TimelineWidget* widget;
+    int bucket_index;
+    QList<int> indexes;
+    QStringList texts;
 };
 
 

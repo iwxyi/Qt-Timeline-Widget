@@ -40,6 +40,16 @@ void TimelineUndoStack::deleteCommand(QList<int> indexes)
     push(new TimelineBucketDeleteCommand(widget, indexes));
 }
 
+void TimelineUndoStack::deleteCommand(TimelineBucket *bucket, int index)
+{
+    push(new TimelineBucketTextDeleteCommand(widget, widget->indexOf(bucket), index));
+}
+
+void TimelineUndoStack::deleteCommand(TimelineBucket *bucket, QList<int> indexes)
+{
+    push(new TimelineBucketTextDeleteCommand(widget, widget->indexOf(bucket), indexes));
+}
+
 void TimelineUndoStack::moveCommand(int old_index, int new_index)
 {
     push(new TimelineBucketMoveCommand(widget, old_index, new_index));

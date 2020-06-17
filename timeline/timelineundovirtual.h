@@ -21,6 +21,8 @@ public:
     virtual void addCommand(TimelineBucket* bucket, QList<int> indexes) = 0;
     virtual void deleteCommand(int index) = 0;
     virtual void deleteCommand(QList<int> indexes) = 0;
+    virtual void deleteCommand(TimelineBucket* bucket, int index) = 0;
+    virtual void deleteCommand(TimelineBucket* bucket, QList<int> indexes) = 0;
     virtual void moveCommand(int old_index, int new_index) = 0;
     virtual void moveCommand(TimelineBucket* bucket, int old_index, int new_index) = 0;
     virtual void moveCommand(TimelineBucket* old_bucket, TimelineBucket* new_bucket, int old_index, int new_index) = 0;

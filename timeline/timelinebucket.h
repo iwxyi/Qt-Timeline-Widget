@@ -37,7 +37,6 @@ public:
     TimelineTimeLabel* timeLabel() const;
     TimelineTextLabel *at(int index) const;
     int indexOf(TimelineTextLabel* label);
-    void moveTextLabel(int from_index, int to_index);
     TimelineTextLabel* createTextLabel(const TimelineTextLabel *another, int index, QPoint pos);
     void clearText();
     TimelineTextLabel *addTextWidget(QString text = "");

@@ -157,20 +157,44 @@ void TimelineBucketDeleteCommand::redo()
     widget->adjustBucketsPositionsWithAnimation();
 }
 
-TimelineBucketTextDeleteCommand::TimelineBucketTextDeleteCommand(TimelineBucket *bucket, TimelineTextLabel *label, int index, QUndoCommand *parent)
-	: QUndoCommand(parent), bucket(bucket), label(label), index(index)
+TimelineBucketTextDeleteCommand::TimelineBucketTextDeleteCommand(TimelineWidget *widget, int bucket_index, int index, QUndoCommand *parent)
+    : TimelineBucketTextDeleteCommand(widget, bucket_index, QList<int>{index}, parent)
+{
+
+}
+
+TimelineBucketTextDeleteCommand::TimelineBucketTextDeleteCommand(TimelineWidget *widget, int bucket_index, QList<int> indexes, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), bucket_index(bucket_index), indexes(indexes)
 {
     setText("删除文字");
 }
 
 void TimelineBucketTextDeleteCommand::undo()
 {
-
+    auto bucket = widget->at(bucket_index);
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        bucket->insertTextWidget(texts.at(i), indexes.at(i));
+    }
+    bucket->adjustWidgetsPositionsWithAnimation(indexes.first());
+    bucket->adjustBucketSize();
 }
 
 void TimelineBucketTextDeleteCommand::redo()
 {
+    auto bucket = widget->at(bucket_index);
+    texts.clear();
+    foreach (auto index, indexes)
+    {
+        texts.append(bucket->getText(index));
+    }
 
+    for (int i = indexes.size()-1; i >= 0; i--)
+    {
+        bucket->removeAt(indexes.at(i));
+    }
+    bucket->adjustWidgetsPositionsWithAnimation(indexes.first());
+    bucket->adjustBucketSize();
 }
 
 TimelineBucketMoveCommand::TimelineBucketMoveCommand(TimelineWidget *widget, int old_index, int new_index, QUndoCommand *parent)
@@ -197,12 +221,12 @@ TimelineBucketTextMoveCommand::TimelineBucketTextMoveCommand(TimelineWidget *wid
 
 void TimelineBucketTextMoveCommand::undo()
 {
-    widget->at(bucket_index)->moveTextLabel(new_index, old_index);
+    widget->at(bucket_index)->actionMoveTextLabel(new_index, old_index);
 }
 
 void TimelineBucketTextMoveCommand::redo()
 {
-    widget->at(bucket_index)->moveTextLabel(old_index, new_index);
+    widget->at(bucket_index)->actionMoveTextLabel(old_index, new_index);
 }
 
 TimelineBucketTextBucketMoveCommand::TimelineBucketTextBucketMoveCommand(TimelineWidget *widget, int old_bucket_index, int new_bucket_index, int old_index, int new_index, QUndoCommand *parent)
