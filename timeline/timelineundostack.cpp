@@ -45,14 +45,14 @@ void TimelineUndoStack::moveCommand(TimelineBucket *old_bucket, TimelineBucket *
     push(new TimelineBucketTextBucketMoveCommand(widget, widget->indexOf(old_bucket), widget->indexOf(new_bucket), old_index, new_index));
 }
 
-void TimelineUndoStack::modifyCommand(TimelineBucket *bucket, TimelineTimeLabel *label, QString old_text, QString new_text)
+void TimelineUndoStack::modifyCommand(TimelineBucket *bucket, QString old_text, QString new_text)
 {
-    push(new TimelineBucketTimeModifyCommand(bucket, label, old_text, new_text));
+    push(new TimelineBucketTimeModifyCommand(widget, widget->indexOf(bucket), old_text, new_text));
 }
 
 void TimelineUndoStack::modifyCommand(TimelineBucket *bucket, TimelineTextLabel *label, QString old_text, QString new_text)
 {
-    push(new TimelineBucketTextModifyCommand(bucket, label, old_text, new_text));
+    push(new TimelineBucketTextModifyCommand(widget, widget->indexOf(bucket), bucket->indexOf(label), old_text, new_text));
 }
 
 void TimelineUndoStack::undoCommand()

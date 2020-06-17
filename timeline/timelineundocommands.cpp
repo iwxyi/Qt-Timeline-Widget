@@ -3,7 +3,7 @@
 TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineBucket *bucket, int index, QUndoCommand *parent)
     : QUndoCommand(parent), bucket(bucket), index(index)
 {
-
+    setText("添加文字");
 }
 
 void TimelineBucketAddCommand::undo()
@@ -19,7 +19,7 @@ void TimelineBucketAddCommand::redo()
 TimelineBucketTextAddCommand::TimelineBucketTextAddCommand(TimelineBucket *bucket, TimelineTextLabel *label, int index, QUndoCommand *parent)
     : QUndoCommand(parent), bucket(bucket), label(label), index(index)
 {
-
+    setText("添加行");
 }
 
 void TimelineBucketTextAddCommand::undo()
@@ -35,7 +35,7 @@ void TimelineBucketTextAddCommand::redo()
 TimelineBucketDeleteCommand::TimelineBucketDeleteCommand(TimelineBucket *bucket, int index, QUndoCommand *parent)
 	: QUndoCommand(parent), bucket(bucket), index(index)
 {
-
+    setText("删除行");
 }
 
 void TimelineBucketDeleteCommand::undo()
@@ -51,7 +51,7 @@ void TimelineBucketDeleteCommand::redo()
 TimelineBucketTextDeleteCommand::TimelineBucketTextDeleteCommand(TimelineBucket *bucket, TimelineTextLabel *label, int index, QUndoCommand *parent)
 	: QUndoCommand(parent), bucket(bucket), label(label), index(index)
 {
-
+    setText("删除文字");
 }
 
 void TimelineBucketTextDeleteCommand::undo()
@@ -67,7 +67,7 @@ void TimelineBucketTextDeleteCommand::redo()
 TimelineBucketMoveCommand::TimelineBucketMoveCommand(TimelineWidget *widget, int old_index, int new_index, QUndoCommand *parent)
     : QUndoCommand(parent), widget(widget), old_index(old_index), new_index(new_index)
 {
-
+    setText("移动行");
 }
 
 void TimelineBucketMoveCommand::undo()
@@ -83,7 +83,7 @@ void TimelineBucketMoveCommand::redo()
 TimelineBucketTextMoveCommand::TimelineBucketTextMoveCommand(TimelineWidget *widget, int bucket_index, int old_index, int new_index, QUndoCommand *parent)
     : QUndoCommand(parent), widget(widget), bucket_index(bucket_index), old_index(old_index), new_index(new_index)
 {
-
+    setText("移动文字");
 }
 
 void TimelineBucketTextMoveCommand::undo()
@@ -99,7 +99,7 @@ void TimelineBucketTextMoveCommand::redo()
 TimelineBucketTextBucketMoveCommand::TimelineBucketTextBucketMoveCommand(TimelineWidget *widget, int old_bucket_index, int new_bucket_index, int old_index, int new_index, QUndoCommand *parent)
     : QUndoCommand(parent), widget(widget), old_bucket_index(old_bucket_index), new_bucket_index(new_bucket_index), old_index(old_index), new_index(new_index)
 {
-
+    setText("移动文字");
 }
 
 void TimelineBucketTextBucketMoveCommand::undo()
@@ -126,34 +126,54 @@ void TimelineBucketTextBucketMoveCommand::redo()
     new_bucket->adjustWidgetsPositionsWithAnimation();
 }
 
-TimelineBucketTimeModifyCommand::TimelineBucketTimeModifyCommand(TimelineBucket *bucket, TimelineTimeLabel *label, QString old_text, QString new_text, QUndoCommand *parent)
-	: QUndoCommand(parent), bucket(bucket), label(label), old_text(old_text), new_text(new_text)
+TimelineBucketTimeModifyCommand::TimelineBucketTimeModifyCommand(TimelineWidget *widget, int bucket_index, QString old_text, QString new_text, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), bucket_index(bucket_index), old_text(old_text), new_text(new_text)
 {
-
+    setText("修改时间");
 }
 
 void TimelineBucketTimeModifyCommand::undo()
 {
-
+    auto bucket = widget->at(bucket_index);
+    auto label = bucket->timeLabel();
+    label->setText(old_text);
+    label->adjustSize();
+    bucket->adjustWidgetsPositionsWithAnimation();
+    widget->adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineBucketTimeModifyCommand::redo()
 {
-
+    auto bucket = widget->at(bucket_index);
+    auto label = bucket->timeLabel();
+    label->setText(new_text);
+    label->adjustSize();
+    bucket->adjustWidgetsPositionsWithAnimation();
+    widget->adjustBucketsPositionsWithAnimation();
 }
 
-TimelineBucketTextModifyCommand::TimelineBucketTextModifyCommand(TimelineBucket *bucket, TimelineTextLabel *label, QString old_text, QString new_text, QUndoCommand *parent)
-	: QUndoCommand(parent), bucket(bucket), old_text(old_text), new_text(new_text)
+TimelineBucketTextModifyCommand::TimelineBucketTextModifyCommand(TimelineWidget *widget, int bucket_index, int label_index, QString old_text, QString new_text, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), bucket_index(bucket_index), label_index(label_index), old_text(old_text), new_text(new_text)
 {
-
+    setText("修改文字");
 }
 
 void TimelineBucketTextModifyCommand::undo()
 {
-
+    auto bucket = widget->at(bucket_index);
+    auto label = bucket->at(label_index);
+    label->setText(old_text);
+    label->adjustSize();
+    bucket->adjustWidgetsPositionsWithAnimation();
+    widget->adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineBucketTextModifyCommand::redo()
 {
-
+    auto bucket = widget->at(bucket_index);
+    auto label = bucket->at(label_index);
+    label->setText(new_text);
+    label->adjustSize();
+    bucket->adjustWidgetsPositionsWithAnimation();
+    widget->adjustBucketsPositionsWithAnimation();
 }

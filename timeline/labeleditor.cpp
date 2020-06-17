@@ -17,6 +17,15 @@ QString LabelEditor::getOriginText()
     return origin_text;
 }
 
+/**
+ * 切换其它操作时，自动结束编辑
+ */
+void LabelEditor::finishIfEditing()
+{
+    if (!this->isHidden())
+        emit signalEditFinished(toPlainText());
+}
+
 void LabelEditor::keyPressEvent(QKeyEvent *event)
 {
     auto key = event->key();

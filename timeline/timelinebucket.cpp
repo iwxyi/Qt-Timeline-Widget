@@ -106,6 +106,11 @@ void TimelineBucket::edit(int index)
         emit signalTextWidgetDoubleClicked(text_widgets.at(index-1));
 }
 
+TimelineTimeLabel *TimelineBucket::timeLabel() const
+{
+    return time_widget;
+}
+
 TimelineTextLabel *TimelineBucket::at(int index) const
 {
     if (index < 0 || index >= text_widgets.size())

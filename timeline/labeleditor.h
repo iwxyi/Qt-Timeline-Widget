@@ -13,6 +13,7 @@ public:
 
     void setOriginText(QString text);
     QString getOriginText();
+    void finishIfEditing();
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;

@@ -18,7 +18,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
     edit = new LabelEditor(center_widget);
     connect(edit, &LabelEditor::textChanged, this, [=] {
         if (editing_label == nullptr)
-                return ;
+            return ;
         editing_label->setText(edit->toPlainText());
 //        if (editing_label->objectName() == "TimelineTextLabel") {
 //            static_cast<TimelineTextLabel>(editing_label).adjustSize(true, edit->toPlainText());
@@ -40,7 +40,24 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
         this->setFocus();
     });
     connect(edit, &LabelEditor::signalEditFinished, this, [=](QString text) {
-        hideEditing();
+        if (editing_label == nullptr) // 快速按下两次时会触发这个信号槽，而第一次已经使 editing_label = nullptr
+            return ;
+        // 编辑结束，保存 undo
+        QString orig = edit->getOriginText();
+        if (text != orig) // 文本有变动
+        {
+            if (editing_bucket->indexOf(static_cast<TimelineTextLabel*>(editing_label)) >= 0)
+            {
+                timeline_undos->modifyCommand(editing_bucket, static_cast<TimelineTextLabel*>(editing_label), orig, text);
+            }
+            else
+            {
+                timeline_undos->modifyCommand(editing_bucket, orig, text);
+            }
+        }
+        edit->hide();
+        editing_label = nullptr;
+        editing_bucket = nullptr;
         this->setFocus();
     });
     edit->hide();
@@ -147,7 +164,7 @@ void TimelineWidget::moveBucket(int from_index, int to_index)
         return ;
     if (from_index < 0 || to_index < 0)
         return ;
-    hideEditing();
+    finishEditing();
 
     // 交换 bucket
     TimelineBucket* bucket = buckets.at(from_index);
@@ -611,10 +628,7 @@ void TimelineWidget::updateUI()
 
 void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
 {
-    if (edit->isVisible())
-    {
-        hideEditing();
-    }
+    finishEditing();
 
     if (QApplication::keyboardModifiers() == Qt::NoModifier) // 没有修饰符，单选
     {
@@ -696,15 +710,6 @@ void TimelineWidget::slotTextWidgetClicked(TimelineTextLabel *label)
 
 void TimelineWidget::slotTimeWidgetDoubleClicked(TimelineTimeLabel *label)
 {
-    /*QString text = label->text();
-    bool ok;
-    text = QInputDialog::getText(this, "修改时间", "请输入新的时间", QLineEdit::Normal, text, &ok);
-    if (!ok)
-        return ;
-    label->setText(text);
-    label->adjustSize();
-    adjustBucketsPositionsWithAnimation();*/
-
     QTimer::singleShot(0, [=]{
         editing_bucket = buckets.at(current_index);
         editing_label = label;
@@ -721,15 +726,6 @@ void TimelineWidget::slotTimeWidgetDoubleClicked(TimelineTimeLabel *label)
 
 void TimelineWidget::slotTextWidgetDoubleClicked(TimelineTextLabel *label)
 {
-    /*QString text = label->text();
-    bool ok;
-    text = QInputDialog::getText(this, "修改内容", "请输入新的内容", QLineEdit::Normal, text, &ok);
-    if (!ok)
-        return ;
-    label->setText(text);
-    label->adjustSize();
-    adjustBucketsPositionsWithAnimation();*/
-
     QTimer::singleShot(0, [=]{
         editing_bucket = buckets.at(current_index);
         editing_label = label;
@@ -806,16 +802,12 @@ void TimelineWidget::slotEdit(int row, int col)
     bucket->edit(col);
 }
 
-void TimelineWidget::hideEditing()
+/**
+ * 准备进行其他操作时，如果正在编辑，则结束编辑
+ */
+void TimelineWidget::finishEditing()
 {
-    edit->hide();
-    if (editing_label == nullptr) // 快速按下两次时会触发这个信号，而第一次已经使 editing_label = nullptr
-        return ;
-    editing_label->adjustSize();
-    editing_bucket->adjustWidgetsPositionsWithAnimation();
-    editing_label = nullptr;
-    editing_bucket = nullptr;
-    adjustBucketsPositionsWithAnimation();
+    edit->finishIfEditing();
 }
 
 void TimelineWidget::actionAddText()
@@ -884,7 +876,7 @@ void TimelineWidget::actionInsertUnder()
 
 void TimelineWidget::actionDeleteLine()
 {
-    hideEditing();
+    finishEditing();
     for (int i = count()-1; i >= 0; i--)
     {
         if (buckets.at(i)->isSelected())

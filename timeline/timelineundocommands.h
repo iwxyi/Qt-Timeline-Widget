@@ -113,14 +113,14 @@ private:
 class TimelineBucketTimeModifyCommand : public QUndoCommand
 {
 public:
-    TimelineBucketTimeModifyCommand(TimelineBucket* bucket, TimelineTimeLabel* label, QString old_text, QString new_text, QUndoCommand* parent = nullptr);
+    TimelineBucketTimeModifyCommand(TimelineWidget* widget, int bucket_index, QString old_text, QString new_text, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
-    TimelineTimeLabel* label;
+    TimelineWidget* widget;
+    int bucket_index;
     QString old_text;
     QString new_text;
 };
@@ -129,14 +129,15 @@ private:
 class TimelineBucketTextModifyCommand : public QUndoCommand
 {
 public:
-    TimelineBucketTextModifyCommand(TimelineBucket* bucket, TimelineTextLabel* label, QString old_text, QString new_text, QUndoCommand* parent = nullptr);
+    TimelineBucketTextModifyCommand(TimelineWidget* widget, int bucket_index, int label_index, QString old_text, QString new_text, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
-    TimelineTextLabel* label;
+    TimelineWidget* widget;
+    int bucket_index;
+    int label_index;
     QString old_text;
     QString new_text;
 };

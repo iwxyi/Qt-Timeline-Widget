@@ -65,7 +65,7 @@ public slots:
     void slotDroppedAndMoved(TimelineBucket* from, TimelineBucket* to);
     void slotEditChanged();
     void slotEdit(int row, int col);
-    void hideEditing();
+    void finishEditing();
 
     void actionAddText();
     void actionAddLine();

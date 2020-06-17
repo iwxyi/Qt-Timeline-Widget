@@ -34,6 +34,7 @@ public:
     QString getText(int index);
     int count();
     void edit(int index);
+    TimelineTimeLabel* timeLabel() const;
     TimelineTextLabel *at(int index) const;
     int indexOf(TimelineTextLabel* label);
     void moveTextLabel(int from_index, int to_index);
