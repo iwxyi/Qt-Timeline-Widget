@@ -145,16 +145,25 @@ TimelineBucketDeleteCommand::TimelineBucketDeleteCommand(TimelineWidget *widget,
 
 void TimelineBucketDeleteCommand::undo()
 {
-
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        widget->insertItem(line_texts.at(i).first, line_texts.at(i).second, indexes.at(i));
+    }
+    widget->resetWidth();
+    widget->adjustBucketsPositionsWithAnimation(indexes.first());
 }
 
 void TimelineBucketDeleteCommand::redo()
 {
+    line_texts.clear();
     for (int i = indexes.size()-1; i >= 0; i--)
     {
+        auto bucket = widget->at(indexes.at(i));
+        line_texts.insert(0, QPair<QString, QStringList>{bucket->getTime(), bucket->getTexts()});
         widget->removeItem(indexes.at(i));
     }
-    widget->adjustBucketsPositionsWithAnimation();
+    widget->resetWidth();
+    widget->adjustBucketsPositionsWithAnimation(indexes.first());
 }
 
 TimelineBucketTextDeleteCommand::TimelineBucketTextDeleteCommand(TimelineWidget *widget, int bucket_index, int index, QUndoCommand *parent)

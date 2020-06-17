@@ -890,16 +890,14 @@ void TimelineWidget::actionDeleteLine()
 {
     finishEditing();
 
-
-
-    /*for (int i = count()-1; i >= 0; i--)
-    {
+    QList<int> indexes;
+    for (int i = 0; i < count(); i++)
         if (buckets.at(i)->isSelected())
-            removeItem(i);
-    }
+            indexes.append(i);
+
+    timeline_undos->deleteCommand(indexes);
     selected_buckets.clear();
-    adjustBucketsPositionsWithAnimation();
-    current_index = -1;*/
+    current_index = -1;
 }
 
 void TimelineWidget::actionCopyText()

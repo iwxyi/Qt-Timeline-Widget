@@ -26,7 +26,7 @@ private:
 
 private:
     TimelineWidget* widget;
-    QList<int> indexes; // 这是插入位置（改动之前的索引，上面的插入会引起下面索引的变动）
+    QList<int> indexes; // 这是插入位置（改动之前的索引，上面的插入会引起下面索引的变动）。请确保先从小到大排好序
     QList<QPair<QString, QStringList>> line_texts;
 };
 
@@ -59,6 +59,7 @@ public:
 private:
     TimelineWidget* widget;
     QList<int> indexes; // 请确保先从小到大排好序
+    QList<QPair<QString, QStringList>> line_texts;
 };
 
 
@@ -74,7 +75,7 @@ public:
 private:
     TimelineWidget* widget;
     int bucket_index;
-    QList<int> indexes;
+    QList<int> indexes; // 请确保先从小到大排好序
     QStringList texts;
 };
 

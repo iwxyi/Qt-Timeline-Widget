@@ -93,6 +93,19 @@ QString TimelineBucket::getText(int index)
     return text_widgets.at(index)->text();
 }
 
+QString TimelineBucket::getTime()
+{
+    return time_widget->text();
+}
+
+QStringList TimelineBucket::getTexts()
+{
+    QStringList sl;
+    foreach (auto label, text_widgets)
+        sl << label->text();
+    return sl;
+}
+
 int TimelineBucket::count()
 {
     return text_widgets.size();

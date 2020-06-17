@@ -32,6 +32,8 @@ public:
     void setText(QStringList texts);
     TimelineTextLabel* insertText(int index, QString text = "");
     QString getText(int index);
+    QString getTime();
+    QStringList getTexts();
     int count();
     void edit(int index);
     TimelineTimeLabel* timeLabel() const;
