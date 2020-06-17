@@ -96,7 +96,7 @@ private:
 class TimelineBucketTextBucketMoveCommand : public QUndoCommand
 {
 public:
-    TimelineBucketTextBucketMoveCommand(TimelineBucket* old_bucket, TimelineBucket* new_bucket, TimelineTextLabel* label, int old_index, int new_index, QUndoCommand* parent = nullptr);
+    TimelineBucketTextBucketMoveCommand(TimelineBucket* old_bucket, TimelineBucket* new_bucket, int old_index, int new_index, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
@@ -104,7 +104,6 @@ public:
 private:
     TimelineBucket* old_bucket;
     TimelineBucket* new_bucket;
-    TimelineTextLabel* label;
     int old_index;
     int new_index;
 };

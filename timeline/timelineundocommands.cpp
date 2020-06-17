@@ -98,20 +98,30 @@ void TimelineBucketTextMoveCommand::redo()
     bucket->moveTextLabel(old_index, new_index);
 }
 
-TimelineBucketTextBucketMoveCommand::TimelineBucketTextBucketMoveCommand(TimelineBucket *old_bucket, TimelineBucket *new_bucket, TimelineTextLabel *label, int old_index, int new_index, QUndoCommand *parent)
-	: QUndoCommand(parent), old_bucket(old_bucket), new_bucket(new_bucket), label(label), old_index(old_index), new_index(new_index)
+TimelineBucketTextBucketMoveCommand::TimelineBucketTextBucketMoveCommand(TimelineBucket *old_bucket, TimelineBucket *new_bucket, int old_index, int new_index, QUndoCommand *parent)
+    : QUndoCommand(parent), old_bucket(old_bucket), new_bucket(new_bucket), old_index(old_index), new_index(new_index)
 {
 
 }
 
 void TimelineBucketTextBucketMoveCommand::undo()
 {
+    auto label = new_bucket->at(new_index);
+    old_bucket->createTextLabel(label, old_index, QPoint(label->x(), label->getGlobalPos().y() - old_bucket->pos().y()));
+    label->draggedToOut();
 
+    old_bucket->adjustBucketSize();
+    old_bucket->adjustWidgetsPositionsWithAnimation();
 }
 
 void TimelineBucketTextBucketMoveCommand::redo()
 {
+    auto label = old_bucket->at(old_index);
+    new_bucket->createTextLabel(label, new_index, QPoint(label->x(), label->getGlobalPos().y() - new_bucket->pos().y()));
+    label->draggedToOut(); // 从父类那里删掉
 
+    new_bucket->adjustBucketSize(); // 从其他bucket那里移动过来，需要手动更换位置
+    new_bucket->adjustWidgetsPositionsWithAnimation();
 }
 
 TimelineBucketTimeModifyCommand::TimelineBucketTimeModifyCommand(TimelineBucket *bucket, TimelineTimeLabel *label, QString old_text, QString new_text, QUndoCommand *parent)

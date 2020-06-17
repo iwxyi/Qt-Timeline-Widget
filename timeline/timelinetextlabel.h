@@ -23,11 +23,12 @@ class TimelineTextLabel : public QLabel
     Q_OBJECT
 public:
     TimelineTextLabel(QWidget* parent = nullptr);
-    TimelineTextLabel(TimelineTextLabel*& another, QWidget* parent = nullptr);
+    TimelineTextLabel(const TimelineTextLabel*& another, QWidget* parent = nullptr);
 
     void adjustSize(bool notify = true, QString text = "");
 
-    QPoint getGlobalPos();
+    QPoint getGlobalPos() const;
+    void draggedToOut();
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;

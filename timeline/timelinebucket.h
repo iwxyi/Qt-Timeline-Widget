@@ -30,12 +30,14 @@ public:
     void setText(int index, QString text);
     void setText(QString text);
     void setText(QStringList texts);
-    TimelineTextLabel *insertText(int index, QString text = "");
+    TimelineTextLabel* insertText(int index, QString text = "");
     QString getText(int index);
     int count();
     void edit(int index);
+    TimelineTextLabel *at(int index) const;
     int indexOf(TimelineTextLabel* label);
     void moveTextLabel(int from_index, int to_index);
+    TimelineTextLabel* createTextLabel(const TimelineTextLabel *another, int index, QPoint pos);
 
     void clearText();
 

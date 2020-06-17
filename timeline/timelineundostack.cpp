@@ -40,9 +40,9 @@ void TimelineUndoStack::moveCommand(TimelineBucket *bucket, TimelineTextLabel *l
     push(new TimelineBucketTextMoveCommand(bucket, label, old_index, new_index));
 }
 
-void TimelineUndoStack::moveCommand(TimelineBucket *old_bucket, TimelineBucket *new_bucket, TimelineTextLabel *label, int old_index, int new_index)
+void TimelineUndoStack::moveCommand(TimelineBucket *old_bucket, TimelineBucket *new_bucket, int old_index, int new_index)
 {
-    push(new TimelineBucketTextBucketMoveCommand(old_bucket, new_bucket, label, old_index, new_index));
+    push(new TimelineBucketTextBucketMoveCommand(old_bucket, new_bucket, old_index, new_index));
 }
 
 void TimelineUndoStack::modifyCommand(TimelineBucket *bucket, TimelineTimeLabel *label, QString old_text, QString new_text)

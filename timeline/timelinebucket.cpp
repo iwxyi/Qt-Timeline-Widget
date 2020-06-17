@@ -106,6 +106,13 @@ void TimelineBucket::edit(int index)
         emit signalTextWidgetDoubleClicked(text_widgets.at(index-1));
 }
 
+TimelineTextLabel *TimelineBucket::at(int index) const
+{
+    if (index < 0 || index >= text_widgets.size())
+        return nullptr;
+    return text_widgets.at(index);
+}
+
 int TimelineBucket::indexOf(TimelineTextLabel *label)
 {
     return text_widgets.indexOf(label);
@@ -118,6 +125,16 @@ void TimelineBucket::moveTextLabel(int from_index, int to_index)
     text_widgets.insert(to_index, widget);
 
     adjustWidgetsPositionsWithAnimation();
+}
+
+TimelineTextLabel *TimelineBucket::createTextLabel(const TimelineTextLabel *another, int index, QPoint pos)
+{
+    auto widget = new TimelineTextLabel(another, this);
+    this->connectWidgetEvent(widget);
+    widget->move(pos.x(), pos.y());
+    widget->show();
+    text_widgets.insert(index, widget);
+    return widget;
 }
 
 TimelineTextLabel* TimelineBucket::addTextWidget(QString text)
@@ -609,20 +626,23 @@ void TimelineBucket::dropEvent(QDropEvent *event)
             int from_index = text_widgets.indexOf(label);
             if (from_index == -1) // 外面拖进来的
             {
-                auto widget = new TimelineTextLabel(label, this);
+                /*auto widget = new TimelineTextLabel(label, this);
                 connectWidgetEvent(widget);
                 widget->move(label->x(), label->getGlobalPos().y() - this->pos().y());
                 widget->show();
 
-                auto prev_bucket = static_cast<TimelineBucket*>(widget->parentWidget());
-                int prev_index = prev_bucket->indexOf(widget);
+                auto prev_bucket = static_cast<TimelineBucket*>(label->parentWidget());
+                int prev_index = prev_bucket->indexOf(label);
                 emit label->signalDraggedToOut(); // 从父类那里删掉
 
                 text_widgets.insert(to_index, widget);
                 adjustBucketSize(); // 从其他bucket那里移动过来，需要手动更换位置
+                adjustWidgetsPositionsWithAnimation(); // TODEL*/
 
-                timeline_undos->moveCommand(prev_bucket, this, widget, prev_index, to_index);
-                adjustWidgetsPositionsWithAnimation(); // TODEL
+                auto prev_bucket = static_cast<TimelineBucket*>(label->parentWidget());
+                int prev_index = prev_bucket->indexOf(label);
+
+                timeline_undos->moveCommand(prev_bucket, this, prev_index, to_index);
             }
             else // 自己的，删掉旧的
             {

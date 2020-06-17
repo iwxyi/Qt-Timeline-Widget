@@ -9,7 +9,7 @@ TimelineTextLabel::TimelineTextLabel(QWidget *parent) : QLabel(parent)
     setWordWrap(true); // 根据宽度自动换行（ 但是需要手动确定宽高）
 }
 
-TimelineTextLabel::TimelineTextLabel(TimelineTextLabel *&another, QWidget *parent) : TimelineTextLabel(parent)
+TimelineTextLabel::TimelineTextLabel(const TimelineTextLabel *&another, QWidget *parent) : TimelineTextLabel(parent)
 {
     setText(another->text());
     resize(another->size());
@@ -46,9 +46,14 @@ void TimelineTextLabel::adjustSize(bool notify, QString text)
         emit signalSizeChanged(size());
 }
 
-QPoint TimelineTextLabel::getGlobalPos()
+QPoint TimelineTextLabel::getGlobalPos() const
 {
     return pos() + parentWidget()->pos();
+}
+
+void TimelineTextLabel::draggedToOut()
+{
+    emit signalDraggedToOut();
 }
 
 void TimelineTextLabel::mousePressEvent(QMouseEvent *event)
