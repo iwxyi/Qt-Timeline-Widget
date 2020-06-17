@@ -39,8 +39,10 @@ public:
     int indexOf(TimelineTextLabel* label);
     void moveTextLabel(int from_index, int to_index);
     TimelineTextLabel* createTextLabel(const TimelineTextLabel *another, int index, QPoint pos);
-
     void clearText();
+    TimelineTextLabel *addTextWidget(QString text = "");
+    TimelineTextLabel *insertTextWidget(QString text = "", int index = -1);
+    void removeAt(int index);
 
     QString toString(QString time_format = "【%1】", QString para_split = "\n");
 
@@ -67,11 +69,9 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
+    void dropEvent(QDropEvent *event) override;   
 
 private:
-    TimelineTextLabel *addTextWidget(QString text = "");
-    TimelineTextLabel *insertTextWidget(QString text = "", int index = -1);
     void connectWidgetEvent(TimelineTextLabel* label);
     bool canDropMimeData(QDropEvent* event);
 

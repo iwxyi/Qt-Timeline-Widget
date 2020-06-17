@@ -14,8 +14,10 @@ public:
 
     virtual void addCommand(int index) override;
     virtual void addCommand(QList<int> indexes) override;
-    virtual void deleteCommand(TimelineBucket* bucket, int index) override;
-    virtual void deleteCommand(TimelineBucket* bucket, TimelineTextLabel* label, int index) override;
+    virtual void addCommand(TimelineBucket* bucket, int index) override;
+    virtual void addCommand(TimelineBucket* bucket, QList<int> indexes) override;
+    virtual void deleteCommand(int index) override;
+    virtual void deleteCommand(QList<int> indexes) override;
     virtual void moveCommand(int old_index, int new_index) override;
     virtual void moveCommand(TimelineBucket* bucket, int old_index, int new_index) override;
     virtual void moveCommand(TimelineBucket* old_bucket, TimelineBucket* new_bucket, int old_index, int new_index) override;

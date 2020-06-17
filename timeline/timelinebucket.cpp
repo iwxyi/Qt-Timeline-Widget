@@ -177,6 +177,11 @@ TimelineTextLabel* TimelineBucket::insertTextWidget(QString text, int index)
     return label;
 }
 
+void TimelineBucket::removeAt(int index)
+{
+    text_widgets.takeAt(index)->deleteLater();
+}
+
 void TimelineBucket::connectWidgetEvent(TimelineTextLabel *label)
 {
     connect(label, &TimelineTextLabel::signalClicked, this, [=] {
@@ -213,9 +218,7 @@ void TimelineBucket::actionInsertLeft(TimelineTextLabel *label)
     if (index == -1)
         return ;
 
-    insertTextWidget("", index);
-    adjustWidgetsPositionsWithAnimation(index);
-    adjustBucketSize();
+    timeline_undos->addCommand(this, index);
 }
 
 void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
@@ -224,9 +227,7 @@ void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
     if (index == -1)
         return ;
 
-    insertTextWidget("", index+1);
-    adjustWidgetsPositionsWithAnimation(index+1);
-    adjustBucketSize();
+    timeline_undos->addCommand(this, index+1);
 }
 
 void TimelineBucket::actionDelete(TimelineTextLabel *label)
@@ -234,7 +235,7 @@ void TimelineBucket::actionDelete(TimelineTextLabel *label)
     int index = text_widgets.indexOf(label);
     if (index == -1)
         return ;
-    text_widgets.takeAt(index)->deleteLater();
+    removeAt(index);
 
     adjustWidgetsPositionsWithAnimation(index);
     adjustWidgetsPositionsWithAnimation();

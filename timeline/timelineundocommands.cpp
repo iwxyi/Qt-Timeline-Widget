@@ -86,12 +86,24 @@ TimelineBucketTextAddCommand::TimelineBucketTextAddCommand(TimelineWidget *widge
 
 void TimelineBucketTextAddCommand::undo()
 {
-
+    auto bucket = widget->at(bucket_index);
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        bucket->removeAt(indexes.at(i));
+    }
+    bucket->adjustWidgetsPositionsWithAnimation(indexes.first());
+    bucket->adjustBucketSize();
 }
 
 void TimelineBucketTextAddCommand::redo()
 {
-
+    auto bucket = widget->at(bucket_index);
+    for (int i = indexes.size()-1; i >= 0; i--)
+    {
+        bucket->insertTextWidget("", indexes.at(i));
+    }
+    bucket->adjustWidgetsPositionsWithAnimation(indexes.first());
+    bucket->adjustBucketSize();
 }
 
 QStringList TimelineBucketAddCommand::numStringList(int number)
@@ -119,10 +131,16 @@ QList<QPair<QString, QStringList> > TimelineBucketAddCommand::string2lineTexts(Q
     return result;
 }
 
-TimelineBucketDeleteCommand::TimelineBucketDeleteCommand(TimelineBucket *bucket, int index, QUndoCommand *parent)
-	: QUndoCommand(parent), bucket(bucket), index(index)
+TimelineBucketDeleteCommand::TimelineBucketDeleteCommand(TimelineWidget *widget, int index, QUndoCommand *parent)
+    : TimelineBucketDeleteCommand(widget, QList<int>{index}, parent)
 {
-    setText("删除行");
+
+}
+
+TimelineBucketDeleteCommand::TimelineBucketDeleteCommand(TimelineWidget *widget, QList<int> indexes, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), indexes(indexes)
+{
+
 }
 
 void TimelineBucketDeleteCommand::undo()
@@ -132,7 +150,11 @@ void TimelineBucketDeleteCommand::undo()
 
 void TimelineBucketDeleteCommand::redo()
 {
-
+    for (int i = indexes.size()-1; i >= 0; i--)
+    {
+        widget->removeItem(indexes.at(i));
+    }
+    widget->adjustBucketsPositionsWithAnimation();
 }
 
 TimelineBucketTextDeleteCommand::TimelineBucketTextDeleteCommand(TimelineBucket *bucket, TimelineTextLabel *label, int index, QUndoCommand *parent)

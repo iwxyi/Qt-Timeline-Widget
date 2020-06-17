@@ -889,14 +889,17 @@ void TimelineWidget::actionInsertUnder()
 void TimelineWidget::actionDeleteLine()
 {
     finishEditing();
-    for (int i = count()-1; i >= 0; i--)
+
+
+
+    /*for (int i = count()-1; i >= 0; i--)
     {
         if (buckets.at(i)->isSelected())
             removeItem(i);
     }
     selected_buckets.clear();
     adjustBucketsPositionsWithAnimation();
-    current_index = -1;
+    current_index = -1;*/
 }
 
 void TimelineWidget::actionCopyText()

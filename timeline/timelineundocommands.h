@@ -43,21 +43,22 @@ public:
 private:
     TimelineWidget* widget;
     int bucket_index;
-    QList<int> indexes;
+    QList<int> indexes; // 请确保先从小到大排好序
 };
 
 
 class TimelineBucketDeleteCommand : public QUndoCommand
 {
 public:
-    TimelineBucketDeleteCommand(TimelineBucket* bucket, int index, QUndoCommand* parent = nullptr);
+    TimelineBucketDeleteCommand(TimelineWidget* widget, int index, QUndoCommand* parent = nullptr);
+    TimelineBucketDeleteCommand(TimelineWidget* widget, QList<int> indexes, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
-    int index;
+    TimelineWidget* widget;
+    QList<int> indexes; // 请确保先从小到大排好序
 };
 
 
