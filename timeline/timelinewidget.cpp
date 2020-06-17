@@ -129,6 +129,45 @@ int TimelineWidget::count()
     return buckets.size();
 }
 
+int TimelineWidget::indexOf(TimelineBucket *bucket) const
+{
+    return buckets.indexOf(bucket);
+}
+
+TimelineBucket *TimelineWidget::at(int index) const
+{
+    if (index < 0 || index >= buckets.size())
+        return nullptr;
+    return buckets.at(index);
+}
+
+void TimelineWidget::moveBucket(int from_index, int to_index)
+{
+    if (from_index == to_index) // 很可能发生的自己和自己交换
+        return ;
+    if (from_index < 0 || to_index < 0)
+        return ;
+    hideEditing();
+
+    // 交换 bucket
+    TimelineBucket* bucket = buckets.at(from_index);
+    buckets.removeAt(from_index);
+    if (from_index < to_index) // 下移
+    {
+        buckets.insert(to_index, bucket);
+        for (int i = from_index; i <= to_index; i++)
+            buckets.at(i)->setVerticalIndex(i);
+    }
+    else // 上移
+    {
+        buckets.insert(to_index, bucket);
+        for (int i = from_index; i >= to_index; i--)
+            buckets.at(i)->setVerticalIndex(i);
+    }
+
+    adjustBucketsPositionsWithAnimation(qMin(from_index, to_index));
+}
+
 void TimelineWidget::selectAll()
 {
     int left = horizontalScrollBar()->sliderPosition(),
@@ -744,31 +783,9 @@ void TimelineWidget::slotMenuShowed(const QPoint &pos)
 
 void TimelineWidget::slotDroppedAndMoved(TimelineBucket *from, TimelineBucket *to)
 {
-    hideEditing();
     int from_index = buckets.indexOf(from);
     int to_index = buckets.indexOf(to);
-    if (from_index == to_index) // 很可能发生的自己和自己交换
-        return ;
-    if (from_index < 0 || to_index < 0)
-        return ;
-
-    // 交换 bucket
-    TimelineBucket* bucket = buckets.at(from_index);
-    buckets.removeAt(from_index);
-    if (from_index < to_index) // 下移
-    {
-        buckets.insert(to_index, bucket);
-        for (int i = from_index; i <= to_index; i++)
-            buckets.at(i)->setVerticalIndex(i);
-    }
-    else // 上移
-    {
-        buckets.insert(to_index, bucket);
-        for (int i = from_index; i >= to_index; i--)
-            buckets.at(i)->setVerticalIndex(i);
-    }
-
-    adjustBucketsPositionsWithAnimation(qMin(from_index, to_index));
+    timeline_undos->moveCommand(from_index, to_index);
 }
 
 void TimelineWidget::slotEditChanged()

@@ -65,13 +65,13 @@ private:
 class TimelineBucketMoveCommand : public QUndoCommand
 {
 public:
-    TimelineBucketMoveCommand(TimelineBucket* bucket, int old_index, int new_index, QUndoCommand* parent = nullptr);
+    TimelineBucketMoveCommand(TimelineWidget* widget, int old_index, int new_index, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
+    TimelineWidget* widget;
     int old_index;
     int new_index;
 };
@@ -80,14 +80,14 @@ private:
 class TimelineBucketTextMoveCommand : public QUndoCommand
 {
 public:
-    TimelineBucketTextMoveCommand(TimelineBucket* bucket, TimelineTextLabel* label, int old_index, int new_index, QUndoCommand* parent = nullptr);
+    TimelineBucketTextMoveCommand(TimelineWidget* widget, int bucket_index, int old_index, int new_index, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
-    TimelineTextLabel* label;
+    TimelineWidget* widget;
+    int bucket_index;
     int old_index;
     int new_index;
 };
@@ -96,14 +96,15 @@ private:
 class TimelineBucketTextBucketMoveCommand : public QUndoCommand
 {
 public:
-    TimelineBucketTextBucketMoveCommand(TimelineBucket* old_bucket, TimelineBucket* new_bucket, int old_index, int new_index, QUndoCommand* parent = nullptr);
+    TimelineBucketTextBucketMoveCommand(TimelineWidget* widget, int old_bucket_index, int new_bucket_index, int old_index, int new_index, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* old_bucket;
-    TimelineBucket* new_bucket;
+    TimelineWidget* widget;
+    int old_bucket_index;
+    int new_bucket_index;
     int old_index;
     int new_index;
 };

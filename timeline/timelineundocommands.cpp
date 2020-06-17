@@ -64,48 +64,48 @@ void TimelineBucketTextDeleteCommand::redo()
 
 }
 
-TimelineBucketMoveCommand::TimelineBucketMoveCommand(TimelineBucket *bucket, int old_index, int new_index, QUndoCommand *parent)
-	: QUndoCommand(parent), bucket(bucket), old_index(old_index), new_index(new_index)
+TimelineBucketMoveCommand::TimelineBucketMoveCommand(TimelineWidget *widget, int old_index, int new_index, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), old_index(old_index), new_index(new_index)
 {
-    qDebug() << "构造";
+
 }
 
 void TimelineBucketMoveCommand::undo()
 {
-    qDebug() << "撤销";
-    bucket->moveTextLabel(new_index, old_index);
+    widget->moveBucket(new_index, old_index);
 }
 
 void TimelineBucketMoveCommand::redo()
 {
-    qDebug() << "重做";
-    bucket->moveTextLabel(old_index, new_index);
+    widget->moveBucket(old_index, new_index);
 }
 
-TimelineBucketTextMoveCommand::TimelineBucketTextMoveCommand(TimelineBucket *bucket, TimelineTextLabel *label, int old_index, int new_index, QUndoCommand *parent)
-	: QUndoCommand(parent), bucket(bucket), label(label), old_index(old_index), new_index(new_index)
+TimelineBucketTextMoveCommand::TimelineBucketTextMoveCommand(TimelineWidget *widget, int bucket_index, int old_index, int new_index, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), bucket_index(bucket_index), old_index(old_index), new_index(new_index)
 {
 
 }
 
 void TimelineBucketTextMoveCommand::undo()
 {
-    bucket->moveTextLabel(new_index, old_index);
+    widget->at(bucket_index)->moveTextLabel(new_index, old_index);
 }
 
 void TimelineBucketTextMoveCommand::redo()
 {
-    bucket->moveTextLabel(old_index, new_index);
+    widget->at(bucket_index)->moveTextLabel(old_index, new_index);
 }
 
-TimelineBucketTextBucketMoveCommand::TimelineBucketTextBucketMoveCommand(TimelineBucket *old_bucket, TimelineBucket *new_bucket, int old_index, int new_index, QUndoCommand *parent)
-    : QUndoCommand(parent), old_bucket(old_bucket), new_bucket(new_bucket), old_index(old_index), new_index(new_index)
+TimelineBucketTextBucketMoveCommand::TimelineBucketTextBucketMoveCommand(TimelineWidget *widget, int old_bucket_index, int new_bucket_index, int old_index, int new_index, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), old_bucket_index(old_bucket_index), new_bucket_index(new_bucket_index), old_index(old_index), new_index(new_index)
 {
 
 }
 
 void TimelineBucketTextBucketMoveCommand::undo()
 {
+    auto new_bucket = widget->at(new_bucket_index);
+    auto old_bucket = widget->at(old_bucket_index);
     auto label = new_bucket->at(new_index);
     old_bucket->createTextLabel(label, old_index, QPoint(label->x(), label->getGlobalPos().y() - old_bucket->pos().y()));
     label->draggedToOut();
@@ -116,6 +116,8 @@ void TimelineBucketTextBucketMoveCommand::undo()
 
 void TimelineBucketTextBucketMoveCommand::redo()
 {
+    auto new_bucket = widget->at(new_bucket_index);
+    auto old_bucket = widget->at(old_bucket_index);
     auto label = old_bucket->at(old_index);
     new_bucket->createTextLabel(label, new_index, QPoint(label->x(), label->getGlobalPos().y() - new_bucket->pos().y()));
     label->draggedToOut(); // 从父类那里删掉

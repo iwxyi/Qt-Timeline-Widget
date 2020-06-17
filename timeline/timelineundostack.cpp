@@ -30,19 +30,19 @@ void TimelineUndoStack::deleteCommand(TimelineBucket *bucket, TimelineTextLabel 
     push(new TimelineBucketTextDeleteCommand(bucket, label, index));
 }
 
-void TimelineUndoStack::moveCommand(TimelineBucket *bucket, int old_index, int new_index)
+void TimelineUndoStack::moveCommand(int old_index, int new_index)
 {
-    push(new TimelineBucketMoveCommand(bucket, old_index, new_index));
+    push(new TimelineBucketMoveCommand(widget, old_index, new_index));
 }
 
-void TimelineUndoStack::moveCommand(TimelineBucket *bucket, TimelineTextLabel *label, int old_index, int new_index)
+void TimelineUndoStack::moveCommand(TimelineBucket *bucket, int old_index, int new_index)
 {
-    push(new TimelineBucketTextMoveCommand(bucket, label, old_index, new_index));
+    push(new TimelineBucketTextMoveCommand(widget, widget->indexOf(bucket), old_index, new_index));
 }
 
 void TimelineUndoStack::moveCommand(TimelineBucket *old_bucket, TimelineBucket *new_bucket, int old_index, int new_index)
 {
-    push(new TimelineBucketTextBucketMoveCommand(old_bucket, new_bucket, old_index, new_index));
+    push(new TimelineBucketTextBucketMoveCommand(widget, widget->indexOf(old_bucket), widget->indexOf(new_bucket), old_index, new_index));
 }
 
 void TimelineUndoStack::modifyCommand(TimelineBucket *bucket, TimelineTimeLabel *label, QString old_text, QString new_text)

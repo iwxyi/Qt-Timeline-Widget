@@ -28,6 +28,9 @@ public:
     void removeItem(int index);
     void clearAll();
     int count();
+    int indexOf(TimelineBucket* bucket) const;
+    TimelineBucket* at(int index) const;
+    void moveBucket(int from_index, int to_index);
 
     void selectAll();
     void unselectAll();
