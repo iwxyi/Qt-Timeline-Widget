@@ -15,9 +15,10 @@ MainWindow::MainWindow(QWidget *parent)
         QStringList sl;
         int count = rand() % 8;
         while (count--)
-            sl << ("文本"+QString::number(rand()%90000+10000));
-        ui->widget->addItem("2020.3."+QString::number(i), sl/*QStringList{QString::number(i)}*/);
+            sl << ("文本"+QString::number(rand()%9999999900+100));
+        ui->widget->addItem("2020.3."+QString::number(i), sl);
     }
+    ui->widget->adjustBucketsPositionsWithAnimation();
 }
 
 MainWindow::~MainWindow()

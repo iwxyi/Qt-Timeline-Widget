@@ -1,7 +1,8 @@
 #ifndef TIMELINEUNDOVIRTUAL_H
 #define TIMELINEUNDOVIRTUAL_H
 
-class QString;
+#include <QString>
+#include <QList>
 
 class TimelineWidget;
 class TimelineBucket;
@@ -14,8 +15,8 @@ public:
     TimelineUndoVirtual();
     virtual ~TimelineUndoVirtual();
 
-    virtual void addCommand(TimelineBucket* bucket, int index) = 0;
-    virtual void addCommand(TimelineBucket* bucket, TimelineTextLabel* label, int index) = 0;
+    virtual void addCommand(int index) = 0;
+    virtual void addCommand(QList<int> indexes) = 0;
     virtual void deleteCommand(TimelineBucket* bucket, int index) = 0;
     virtual void deleteCommand(TimelineBucket* bucket, TimelineTextLabel* label, int index) = 0;
     virtual void moveCommand(int old_index, int new_index) = 0;

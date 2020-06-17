@@ -40,6 +40,7 @@ public:
     void setCurrentItem(TimelineBucket* bucket, bool multi = false);
     void scrollTo(int index = -1);
 
+    void resetWidth();
     void adjustBucketsPositions(int start = -1);
     void adjustBucketsPositionsWithAnimation(int start = 0, int end = -1);
 
@@ -85,6 +86,7 @@ private:
     QLabel* editing_label;
     
     bool _adusting_buckets_size; // 是否正在调整索引buckets大小（无视此时触发的sizeHintChanged信号）
+    bool _width_need_adjust = false; // 下次动画是否强制调整宽度
 };
 
 #endif // TIMELINEWIDGET_H

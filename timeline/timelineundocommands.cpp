@@ -1,25 +1,87 @@
 #include "timelineundocommands.h"
 
-TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineBucket *bucket, int index, QUndoCommand *parent)
-    : QUndoCommand(parent), bucket(bucket), index(index)
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, int index, QUndoCommand *parent)
+    : TimelineBucketAddCommand(widget, index, "", parent)
 {
-    setText("添加文字");
+
+}
+
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, int index, QString time, QUndoCommand *parent)
+    : TimelineBucketAddCommand(widget, index, time, "", parent)
+{
+
+}
+
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, int index, QString time, QString text, QUndoCommand *parent)
+    : TimelineBucketAddCommand(widget, index, time, QStringList{text}, parent)
+{
+
+}
+
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, int index, QString time, QStringList texts, QUndoCommand *parent)
+    : TimelineBucketAddCommand(widget, QList<int>{index}, QList<QPair<QString, QStringList>>{{time, texts}}, parent)
+{
+
+}
+
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, QList<int> indexes, QUndoCommand *parent)
+    : TimelineBucketAddCommand(widget, indexes, numStringList(indexes.size()), parent)
+{
+
+}
+
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, QList<int> indexes, QStringList times, QUndoCommand *parent)
+    : TimelineBucketAddCommand(widget, indexes, string2lineTexts(times), parent)
+{
+
+}
+
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, QList<int> indexes, QStringList times, QList<QStringList> textss, QUndoCommand *parent)
+    : TimelineBucketAddCommand(widget, indexes, string2lineTexts(times, textss), parent)
+{
+
+}
+
+TimelineBucketAddCommand::TimelineBucketAddCommand(TimelineWidget *widget, QList<int> indexes, QList<QPair<QString, QStringList> > line_texts, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), indexes(indexes), line_texts(line_texts)
+{
+    setText("添加行");
 }
 
 void TimelineBucketAddCommand::undo()
 {
-
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        widget->removeItem(indexes.at(i));
+    }
+    widget->resetWidth();
+    widget->adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineBucketAddCommand::redo()
 {
-
+    int cumu = 0; // 上面插入影响下面索引的累加变化量
+    for (int i = 0; i < indexes.size(); i++)
+    {
+        if (indexes.at(i) == -1) // 默认末尾，设置为最后一项
+            indexes[i] = widget->count();
+        widget->insertItem(line_texts.at(i).first, line_texts.at(i).second, indexes.at(i)+cumu);
+        cumu++;
+    }
+    widget->resetWidth();
+    widget->adjustBucketsPositionsWithAnimation();
 }
 
-TimelineBucketTextAddCommand::TimelineBucketTextAddCommand(TimelineBucket *bucket, TimelineTextLabel *label, int index, QUndoCommand *parent)
-    : QUndoCommand(parent), bucket(bucket), label(label), index(index)
+TimelineBucketTextAddCommand::TimelineBucketTextAddCommand(TimelineWidget *widget, int bucket_index, int index, QUndoCommand *parent)
+    : TimelineBucketTextAddCommand(widget, bucket_index, QList<int>{index}, parent)
 {
-    setText("添加行");
+    setText("添加文字");
+}
+
+TimelineBucketTextAddCommand::TimelineBucketTextAddCommand(TimelineWidget *widget, int bucket_index, QList<int> indexes, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), bucket_index(bucket_index), indexes(indexes)
+{
+
 }
 
 void TimelineBucketTextAddCommand::undo()
@@ -30,6 +92,31 @@ void TimelineBucketTextAddCommand::undo()
 void TimelineBucketTextAddCommand::redo()
 {
 
+}
+
+QStringList TimelineBucketAddCommand::numStringList(int number)
+{
+    QStringList result;
+    while (number-- >= 0)
+        result.append("");
+    return result;
+}
+
+QList<QPair<QString, QStringList> > TimelineBucketAddCommand::string2lineTexts(QStringList list)
+{
+    QList<QPair<QString, QStringList> > result;
+    foreach (auto li, list)
+        result.append(QPair<QString, QStringList>{li, QStringList{}});
+    return result;
+}
+
+QList<QPair<QString, QStringList> > TimelineBucketAddCommand::string2lineTexts(QStringList list, QList<QStringList> textss)
+{
+    int size = qMin(list.size(), textss.size());
+    QList<QPair<QString, QStringList> > result;
+    for (int i = 0; i < size; i++)
+        result.append(QPair<QString, QStringList>{list.at(i), textss.at(i)});
+    return result;
 }
 
 TimelineBucketDeleteCommand::TimelineBucketDeleteCommand(TimelineBucket *bucket, int index, QUndoCommand *parent)

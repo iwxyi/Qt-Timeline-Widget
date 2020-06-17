@@ -9,6 +9,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
     connect(this,SIGNAL(customContextMenuRequested (const QPoint&)),this,SLOT(slotMenuShowed(const QPoint&)));
 
     _adusting_buckets_size = false;
+    _width_need_adjust = false;
     current_index = -1;
     center_widget = new QWidget(this);
     setWidget(center_widget);
@@ -68,13 +69,11 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
 void TimelineWidget::addItem(QString time, QString text)
 {
     addItem(time, QStringList{text});
-    adjustBucketsPositionsWithAnimation();
 }
 
 void TimelineWidget::addItem(QString time, QStringList texts)
 {
     insertItem(time, texts, -1);
-    adjustBucketsPositionsWithAnimation();
 }
 
 TimelineBucket *TimelineWidget::insertItem(QString time, QStringList texts, int index)
@@ -128,7 +127,9 @@ void TimelineWidget::removeItem(int index)
     if (index < 0 || index >= count())
         return ;
 
-    buckets.takeAt(index)->deleteLater();
+    auto bucket = buckets.takeAt(index);
+    selected_buckets.removeOne(bucket);
+    bucket->deleteLater();
 
     adjustBucketsPositionsWithAnimation(index);
 }
@@ -261,6 +262,11 @@ void TimelineWidget::scrollTo(int index)
     }
 }
 
+void TimelineWidget::resetWidth()
+{
+    _width_need_adjust = true;
+}
+
 /**
  * 调整某一个位置及后面的所有top
  */
@@ -283,7 +289,7 @@ void TimelineWidget::adjustBucketsPositions(int start)
 
     _adusting_buckets_size = true;
     {
-        if (max_width != current_width)
+        if (max_width != current_width || _width_need_adjust)
         {
             foreach (auto bucket, buckets)
             {
@@ -337,7 +343,7 @@ void TimelineWidget::adjustBucketsPositionsWithAnimation(int start, int end)
     // 这句会在启动时触发 signalSizeHintChanged，但是必须需要啊
     // _adusting_buckets_size = true;
     {
-        if (max_width != current_width)
+        if (max_width != current_width || _width_need_adjust)
         {
             foreach (auto bucket, buckets)
             {
@@ -835,43 +841,49 @@ void TimelineWidget::actionAddText()
 
 void TimelineWidget::actionAddLine()
 {
-    addItem("时间节点", "");
+    timeline_undos->addCommand(count());
     setCurrentItem(count()-1);
     scrollTo();
 }
 
 void TimelineWidget::actionInsertAbove()
 {
-    QList<TimelineBucket*> adds;
-    for (int i = count()-1; i>= 0; i--)
-    {
+    QList<int> indexes;
+    for (int i = 0; i < count(); i++)
         if (buckets.at(i)->isSelected())
-        {
-            adds.append(insertItem("时间节点", QStringList{""}, i));
-        }
-    }
+            indexes.append(i);
+
+    timeline_undos->addCommand(indexes);
+
     unselectAll();
-    selected_buckets = adds;
-    foreach (auto bucket, selected_buckets)
+    int cumu = 0;
+    for (int i = 0; i < indexes.count(); i++)
+    {
+        auto bucket = buckets.at(indexes.at(i)+cumu);
         bucket->setSelected(true);
-    adjustBucketsPositionsWithAnimation();
+        selected_buckets.append(bucket);
+        cumu++;
+    }
 }
 
 void TimelineWidget::actionInsertUnder()
 {
-    QList<TimelineBucket*> adds;
-    for (int i = count()-1; i>= 0; i--)
-    {
+    QList<int> indexes;
+    for (int i = 0; i < count(); i++)
         if (buckets.at(i)->isSelected())
-        {
-            adds.append(insertItem("时间节点", QStringList{""}, i+1));
-        }
-    }
+            indexes.append(i+1);
+
+    timeline_undos->addCommand(indexes);
+
     unselectAll();
-    selected_buckets = adds;
-    foreach (auto bucket, selected_buckets)
+    int cumu = 0;
+    for (int i = 0; i < indexes.count(); i++)
+    {
+        auto bucket = buckets.at(indexes.at(i)+cumu);
         bucket->setSelected(true);
-    adjustBucketsPositionsWithAnimation();
+        selected_buckets.append(bucket);
+        cumu++;
+    }
 }
 
 void TimelineWidget::actionDeleteLine()

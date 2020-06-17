@@ -10,14 +10,14 @@ TimelineUndoStack::TimelineUndoStack(TimelineWidget *widget) : QUndoStack(widget
 //    redo_action->setShortcut(QKeySequence::Redo);
 }
 
-void TimelineUndoStack::addCommand(TimelineBucket *bucket, int index)
+void TimelineUndoStack::addCommand(int index)
 {
-    push(new TimelineBucketAddCommand(bucket, index));
+    push(new TimelineBucketAddCommand(widget, index));
 }
 
-void TimelineUndoStack::addCommand(TimelineBucket *bucket, TimelineTextLabel *label, int index)
+void TimelineUndoStack::addCommand(QList<int> indexes)
 {
-    push(new TimelineBucketTextAddCommand(bucket, label, index));
+    push(new TimelineBucketAddCommand(widget, indexes));
 }
 
 void TimelineUndoStack::deleteCommand(TimelineBucket *bucket, int index)

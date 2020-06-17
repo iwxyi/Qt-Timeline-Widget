@@ -7,29 +7,43 @@
 class TimelineBucketAddCommand : public QUndoCommand
 {
 public:
-    TimelineBucketAddCommand(TimelineBucket* bucket, int index, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, int index, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, int index, QString time, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, int index, QString time, QString text, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, int index, QString time, QStringList texts, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, QList<int> indexes, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, QList<int> indexes, QStringList times, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, QList<int> indexes, QStringList times, QList<QStringList> textss, QUndoCommand* parent = nullptr);
+    TimelineBucketAddCommand(TimelineWidget* widget, QList<int> indexes, QList<QPair<QString, QStringList>> line_texts, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
-    int index;
+    static QStringList numStringList(int number);
+    static QList<QPair<QString, QStringList>> string2lineTexts(QStringList list);
+    static QList<QPair<QString, QStringList>> string2lineTexts(QStringList list, QList<QStringList> textss);
+
+private:
+    TimelineWidget* widget;
+    QList<int> indexes; // 这是插入位置（改动之前的索引，上面的插入会引起下面索引的变动）
+    QList<QPair<QString, QStringList>> line_texts;
 };
 
 
 class TimelineBucketTextAddCommand : public QUndoCommand
 {
 public:
-    TimelineBucketTextAddCommand(TimelineBucket* bucket, TimelineTextLabel* label, int index, QUndoCommand *parent = nullptr);
+    TimelineBucketTextAddCommand(TimelineWidget* widget, int bucket_index, int index, QUndoCommand *parent = nullptr);
+    TimelineBucketTextAddCommand(TimelineWidget* widget, int bucket_index, QList<int> indexes, QUndoCommand* parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    TimelineBucket* bucket;
-    TimelineTextLabel* label;
-    int index;
+    TimelineWidget* widget;
+    int bucket_index;
+    QList<int> indexes;
 };
 
 
