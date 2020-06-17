@@ -106,6 +106,20 @@ void TimelineBucket::edit(int index)
         emit signalTextWidgetDoubleClicked(text_widgets.at(index-1));
 }
 
+int TimelineBucket::indexOf(TimelineTextLabel *label)
+{
+    return text_widgets.indexOf(label);
+}
+
+void TimelineBucket::moveTextLabel(int from_index, int to_index)
+{
+    auto widget = text_widgets.at(from_index);
+    text_widgets.removeAt(from_index);
+    text_widgets.insert(to_index, widget);
+
+    adjustWidgetsPositionsWithAnimation();
+}
+
 TimelineTextLabel* TimelineBucket::addTextWidget(QString text)
 {
     return insertTextWidget(text, -1);
@@ -599,20 +613,25 @@ void TimelineBucket::dropEvent(QDropEvent *event)
                 connectWidgetEvent(widget);
                 widget->move(label->x(), label->getGlobalPos().y() - this->pos().y());
                 widget->show();
+
+                auto prev_bucket = static_cast<TimelineBucket*>(widget->parentWidget());
+                int prev_index = prev_bucket->indexOf(widget);
                 emit label->signalDraggedToOut(); // 从父类那里删掉
 
                 text_widgets.insert(to_index, widget);
                 adjustBucketSize(); // 从其他bucket那里移动过来，需要手动更换位置
+
+                timeline_undos->moveCommand(prev_bucket, this, widget, prev_index, to_index);
+                adjustWidgetsPositionsWithAnimation(); // TODEL
             }
             else // 自己的，删掉旧的
             {
-                auto widget = text_widgets.at(from_index);
-                text_widgets.removeAt(from_index);
-                text_widgets.insert(to_index, widget);
+//                moveTextLabel(from_index, to_index);
+
+                timeline_undos->moveCommand(this, from_index, to_index);
             }
 
             repaint();
-            adjustWidgetsPositionsWithAnimation();
         }
     }
 

@@ -521,6 +521,20 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
             return ;
         }
         break;
+    case Qt::Key_Z:
+        if (modifiers == Qt::ControlModifier)
+        {
+            timeline_undos->undoCommand();
+            return ;
+        }
+        break;
+    case Qt::Key_Y:
+        if (modifiers == Qt::ControlModifier)
+        {
+            timeline_undos->redoCommand();
+            return ;
+        }
+        break;
     case Qt::Key_C:
         actionCopyText();
         return ;

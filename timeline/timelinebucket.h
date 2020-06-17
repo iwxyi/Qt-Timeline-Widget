@@ -20,6 +20,7 @@ class TimelineBucket : public QWidget
 {
     Q_OBJECT
     Q_PROPERTY(int water_prop READ getWaterProp WRITE setWaterProp)
+    friend class TimelineUndoStack;
 public:
     TimelineBucket(QWidget *parent = nullptr);
     void initView();
@@ -33,6 +34,8 @@ public:
     QString getText(int index);
     int count();
     void edit(int index);
+    int indexOf(TimelineTextLabel* label);
+    void moveTextLabel(int from_index, int to_index);
 
     void clearText();
 

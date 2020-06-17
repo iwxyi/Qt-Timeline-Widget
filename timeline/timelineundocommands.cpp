@@ -67,17 +67,19 @@ void TimelineBucketTextDeleteCommand::redo()
 TimelineBucketMoveCommand::TimelineBucketMoveCommand(TimelineBucket *bucket, int old_index, int new_index, QUndoCommand *parent)
 	: QUndoCommand(parent), bucket(bucket), old_index(old_index), new_index(new_index)
 {
-
+    qDebug() << "构造";
 }
 
 void TimelineBucketMoveCommand::undo()
 {
-
+    qDebug() << "撤销";
+    bucket->moveTextLabel(new_index, old_index);
 }
 
 void TimelineBucketMoveCommand::redo()
 {
-
+    qDebug() << "重做";
+    bucket->moveTextLabel(old_index, new_index);
 }
 
 TimelineBucketTextMoveCommand::TimelineBucketTextMoveCommand(TimelineBucket *bucket, TimelineTextLabel *label, int old_index, int new_index, QUndoCommand *parent)
@@ -88,12 +90,12 @@ TimelineBucketTextMoveCommand::TimelineBucketTextMoveCommand(TimelineBucket *buc
 
 void TimelineBucketTextMoveCommand::undo()
 {
-
+    bucket->moveTextLabel(new_index, old_index);
 }
 
 void TimelineBucketTextMoveCommand::redo()
 {
-
+    bucket->moveTextLabel(old_index, new_index);
 }
 
 TimelineBucketTextBucketMoveCommand::TimelineBucketTextBucketMoveCommand(TimelineBucket *old_bucket, TimelineBucket *new_bucket, TimelineTextLabel *label, int old_index, int new_index, QUndoCommand *parent)

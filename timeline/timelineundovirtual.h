@@ -24,6 +24,9 @@ public:
     virtual void modifyCommand(TimelineBucket* bucket, TimelineTimeLabel* label, QString old_text, QString new_text) = 0;
     virtual void modifyCommand(TimelineBucket* bucket, TimelineTextLabel* label, QString old_text, QString new_text) = 0;
 
+    virtual void undoCommand() = 0;
+    virtual void redoCommand() = 0;
+
 };
 
 #endif // TIMELINEUNDOVIRTUAL_H

@@ -3,6 +3,11 @@
 TimelineUndoStack::TimelineUndoStack(TimelineWidget *widget) : QUndoStack(widget), widget(widget)
 {
     timeline_undos = this;
+
+//    auto undo_action = createUndoAction(widget, tr("&Undo"));
+//    undo_action->setShortcut(QKeySequence::Undo);
+//    auto redo_action = createRedoAction(widget, tr("&Redo"));
+//    redo_action->setShortcut(QKeySequence::Redo);
 }
 
 void TimelineUndoStack::addCommand(TimelineBucket *bucket, int index)
@@ -48,4 +53,14 @@ void TimelineUndoStack::modifyCommand(TimelineBucket *bucket, TimelineTimeLabel 
 void TimelineUndoStack::modifyCommand(TimelineBucket *bucket, TimelineTextLabel *label, QString old_text, QString new_text)
 {
     push(new TimelineBucketTextModifyCommand(bucket, label, old_text, new_text));
+}
+
+void TimelineUndoStack::undoCommand()
+{
+    QUndoStack::undo();
+}
+
+void TimelineUndoStack::redoCommand()
+{
+    QUndoStack::redo();
 }
