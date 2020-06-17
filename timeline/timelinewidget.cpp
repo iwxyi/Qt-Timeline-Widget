@@ -922,6 +922,8 @@ void TimelineWidget::actionCopyText()
     {
         if (bucket->isSelected())
         {
+            if (!result.isEmpty())
+                result += "\n";
             result += bucket->toString();
         }
     }
@@ -938,6 +940,7 @@ void TimelineWidget::actionPaste()
     int c2 = this->count();
     if (c == c2) // 没有变化
         return ;
+    unselectAll();
     for (int i = c; i < c2; i++)
         selectItem(at(i));
     scrollTo(c2-1);
