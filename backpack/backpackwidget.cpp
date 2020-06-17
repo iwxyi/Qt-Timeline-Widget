@@ -59,7 +59,7 @@ void BackpackWidget::refreshTimeline()
     else if (indexes.size() == 1)
     {
         int size = indexes.first();
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i <= size; i++)
             watched_indexes.append(i);
     }
     // 若是多选，则只查看选中的那些行
@@ -80,11 +80,16 @@ void BackpackWidget::refreshTimeline()
     QRegularExpression addRe("^(@(.*))?\\+(.+)");
     QRegularExpression delRe("^(@(.*))?\\-(.+)");
     QRegularExpression modRe("^(@(.*))?\\*(.+?)=(.*)");
+    auto getBackpack = [&](QString name) {
+        if (!backpacks.contains(name))
+            backpacks.insert(name, QList<TimeThing>{});
+        return &backpacks[name];
+    };
 
     // ==== 顺序遍历背包 ====
     for (int i = 0; i < watched_indexes.size(); i++)
     {
-        auto bucket = timeline->at(i);
+        auto bucket = timeline->at(watched_indexes.at(i));
         auto time = bucket->getTime();
         auto texts = bucket->getTexts();
 
@@ -95,11 +100,30 @@ void BackpackWidget::refreshTimeline()
             if (text.indexOf(addRe, 0, &match) > -1)
             {
                 auto rsts = match.capturedTexts();
-                qDebug() << text << rsts;
+                QString bp = rsts.at(2); // 背包名字
+                QString name = rsts.at(3); // 物品名字
+                TimeThing thing;
+                thing.time_index = watched_indexes.at(i);
+                thing.name = name;
+                getBackpack(bp)->append(thing);
             }
 
             // -物品
-
+            else if (text.indexOf(addRe, 0, &match) > -1)
+            {
+                auto rsts = match.capturedTexts();
+                QString bp = rsts.at(2); // 背包名字
+                QString name = rsts.at(3); // 物品名字
+                auto things = getBackpack(bp);
+                for (int j = 0; j < things->size(); j++)
+                {
+                    if (things->at(j).name == name)
+                    {
+                        things->removeAt(j);
+                        break;
+                    }
+                }
+            }
 
             // *物品=
 
