@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     srand(time(0));
 
     (new TimelineUndoStack(ui->widget));
+    ui->widget_2->setTimeline(ui->widget);
 
     for (int i = 0; i < 20; i++)
     {

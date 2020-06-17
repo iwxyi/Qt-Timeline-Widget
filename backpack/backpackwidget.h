@@ -3,13 +3,16 @@
 
 #include <QListWidget>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QPushButton>
 #include "timelinewidget.h"
 
 class BackpackWidget : public QWidget
 {
     Q_OBJECT
 public:
-    BackpackWidget(TimelineWidget* timeline, QWidget *parent = nullptr);
+    BackpackWidget(QWidget *parent = nullptr);
+    void setTimeline(TimelineWidget* timeline);
 
     struct TimeThing {
         QString name;   // 物品的名字
@@ -20,6 +23,9 @@ public:
 private:
     void initView();
 
+protected:
+    void keyPressEvent(QKeyEvent *event) override;
+
 signals:
 
 public slots:
@@ -27,8 +33,9 @@ public slots:
 
 private:
     QListWidget* list_widget;
+    QPushButton* refresh_btn;
     TimelineWidget* timeline;
-    QList<TimeThing> things;
+    QHash<QString, QList<TimeThing>> backpacks;
 };
 
 #endif // BACKPACKWIDGET_H

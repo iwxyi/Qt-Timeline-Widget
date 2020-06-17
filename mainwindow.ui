@@ -21,7 +21,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="widget_2" native="true"/>
+     <widget class="BackpackWidget" name="widget_2" native="true"/>
     </item>
    </layout>
   </widget>
@@ -42,6 +42,12 @@
    <class>TimelineWidget</class>
    <extends>QWidget</extends>
    <header location="global">timelinewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BackpackWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">backpack\backpackwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
