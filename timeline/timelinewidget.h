@@ -55,6 +55,8 @@ private:
     TimelineBucket *createItemWidget(QString time, QStringList texts);
 
 signals:
+    void manualSelected(); // 鼠标/键盘事件
+    void selectedItemsChanged();
 
 public slots:
     void updateUI();

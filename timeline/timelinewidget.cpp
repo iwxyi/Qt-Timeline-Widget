@@ -215,12 +215,14 @@ void TimelineWidget::selectItem(TimelineBucket *bucket)
     bucket->setSelected(true);
     if (!selected_buckets.contains(bucket))
         selected_buckets.append(bucket);
+    emit selectedItemsChanged();
 }
 
 void TimelineWidget::unselectItem(TimelineBucket *bucket)
 {
     bucket->setSelected(false);
     selected_buckets.removeOne(bucket);
+    emit selectedItemsChanged();
 }
 
 void TimelineWidget::setCurrentItem(int row, bool multi)
@@ -500,6 +502,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 bucket->setPressPos(QPoint(qMin(bucket->width(), horizontalScrollBar()->pageStep()), bucket->height()));
                 setCurrentItem(current_index-1);
                 scrollTo();
+                emit manualSelected();
                 return ;
             }
             else if (modifiers == Qt::ShiftModifier) // 上移并选中/取消你
@@ -517,6 +520,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                     setCurrentItem(current_index-1, true);
                 }
                 scrollTo();
+                emit manualSelected();
                 return ;
             }
         }
@@ -530,6 +534,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 bucket->setPressPos(QPoint(qMin(bucket->width(), horizontalScrollBar()->pageStep()), 0));
                 setCurrentItem(current_index+1);
                 scrollTo();
+                emit manualSelected();
                 return ;
             }
             else if (modifiers == Qt::ShiftModifier) // 下移并选中/取消
@@ -547,6 +552,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                     setCurrentItem(current_index+1, true);
                 }
                 scrollTo();
+                emit manualSelected();
                 return ;
             }
         }
@@ -561,6 +567,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 index--;
             }
             scrollTo();
+            emit manualSelected();
             return ;
         }
         break;
@@ -574,6 +581,7 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
                 index++;
             }
             scrollTo();
+            emit manualSelected();
             return ;
         }
         break;
@@ -723,6 +731,7 @@ void TimelineWidget::slotBucketWidgetToSelect(TimelineBucket *bucket)
         }
         current_index = curr;
     }
+    emit manualSelected();
 }
 
 void TimelineWidget::slotTimeWidgetClicked(TimelineTimeLabel *label)

@@ -1,6 +1,6 @@
 #include "backpackwidget.h"
 
-BackpackWidget::BackpackWidget(QWidget *parent) : QWidget(parent), timeline(timeline)
+BackpackWidget::BackpackWidget(QWidget *parent) : QWidget(parent)
 {
     initView();
 }
@@ -8,6 +8,8 @@ BackpackWidget::BackpackWidget(QWidget *parent) : QWidget(parent), timeline(time
 void BackpackWidget::setTimeline(TimelineWidget *timeline)
 {
     this->timeline = timeline;
+
+    connect(timeline, SIGNAL(selectedItemsChanged()), this, SLOT(autoRefreshTimeline()));
 }
 
 void BackpackWidget::initView()
@@ -21,6 +23,13 @@ void BackpackWidget::initView()
     setLayout(layout);
 
     connect(refresh_btn, SIGNAL(clicked()), this, SLOT(refreshTimeline()));
+    connect(list_widget, &QListWidget::itemActivated, this, [=](QListWidgetItem *item){
+        int row = list_widget->row(item);
+        int index = backpacks.value(current_backpack).at(row).time_index;
+        is_focusing_item = true;
+        timeline->setCurrentItem(index);
+        is_focusing_item = false;
+    });
 }
 
 void BackpackWidget::keyPressEvent(QKeyEvent *event)
@@ -35,6 +44,12 @@ void BackpackWidget::keyPressEvent(QKeyEvent *event)
     }
 
     QWidget::keyPressEvent(event);
+}
+
+void BackpackWidget::autoRefreshTimeline()
+{
+    if (auto_refresh && !is_focusing_item)
+        refreshTimeline();
 }
 
 /**
@@ -78,7 +93,7 @@ void BackpackWidget::refreshTimeline()
      * @主角*等级=3
      */
     QRegularExpression addRe("^(@(.*))?\\+(.+)");
-    QRegularExpression delRe("^(@(.*))?\\-(.+)");
+    QRegularExpression delRe("^(@(.*))?-(.+)");
     QRegularExpression modRe("^(@(.*))?\\*(.+?)=(.*)");
     auto getBackpack = [&](QString name) {
         if (!backpacks.contains(name))
@@ -109,7 +124,7 @@ void BackpackWidget::refreshTimeline()
             }
 
             // -物品
-            else if (text.indexOf(addRe, 0, &match) > -1)
+            else if (text.indexOf(delRe, 0, &match) > -1)
             {
                 auto rsts = match.capturedTexts();
                 QString bp = rsts.at(2); // 背包名字
@@ -142,6 +157,7 @@ void BackpackWidget::refreshTimeline()
             max_name = i.key();
         }
     }
+    current_backpack = max_name;
     auto things = backpacks.value(max_name);
 
     foreach (auto thing, things) {

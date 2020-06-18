@@ -29,13 +29,19 @@ protected:
 signals:
 
 public slots:
+    void autoRefreshTimeline();
     void refreshTimeline();
 
 private:
     QListWidget* list_widget;
     QPushButton* refresh_btn;
     TimelineWidget* timeline;
+
     QHash<QString, QList<TimeThing>> backpacks;
+    QString current_backpack;
+
+    bool auto_refresh = true;
+    bool is_focusing_item = false;
 };
 
 #endif // BACKPACKWIDGET_H
