@@ -14,15 +14,22 @@ void BackpackWidget::setTimeline(TimelineWidget *timeline)
 
 void BackpackWidget::initView()
 {
-    refresh_btn = new QPushButton("刷新", this);
+    bps_combo = new QComboBox(this);
     list_widget = new QListWidget(this);
+    refresh_btn = new QPushButton("刷新", this);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->addWidget(refresh_btn);
+    layout->addWidget(bps_combo);
     layout->addWidget(list_widget);
+    layout->addWidget(refresh_btn);
     setLayout(layout);
 
-    connect(refresh_btn, SIGNAL(clicked()), this, SLOT(refreshTimeline()));
+    connect(bps_combo, &QComboBox::currentTextChanged, this, [=](QString name){
+        if (bps_combo->count() == 0)
+            return ;
+        current_backpack = name;
+        refreshThings();
+    });
     connect(list_widget, &QListWidget::itemActivated, this, [=](QListWidgetItem *item){
         int row = list_widget->row(item);
         int index = backpacks.value(current_backpack).at(row).time_index;
@@ -30,6 +37,7 @@ void BackpackWidget::initView()
         timeline->setCurrentItem(index);
         is_focusing_item = false;
     });
+    connect(refresh_btn, SIGNAL(clicked()), this, SLOT(refreshTimeline()));
 }
 
 void BackpackWidget::keyPressEvent(QKeyEvent *event)
@@ -140,14 +148,19 @@ void BackpackWidget::refreshTimeline()
                 }
             }
 
-            // *物品=
+            // *物品=属性
+
+            // *物品+数值  *物品-数值
 
         }
     }
 
     // ==== 内容显示至视图 ====
-    list_widget->clear();
-    QString max_name = "";
+    bps_combo->clear();
+    bps_combo->addItems(backpacks.keys());
+    bps_combo->setCurrentText(current_backpack);
+
+    /*QString max_name = "";
     int max_count = 0;
     for (auto i = backpacks.begin(); i != backpacks.end(); i++)
     {
@@ -157,9 +170,14 @@ void BackpackWidget::refreshTimeline()
             max_name = i.key();
         }
     }
-    current_backpack = max_name;
-    auto things = backpacks.value(max_name);
+    current_backpack = max_name;*/
 
+}
+
+void BackpackWidget::refreshThings()
+{
+    list_widget->clear();
+    auto things = backpacks.value(current_backpack);
     foreach (auto thing, things) {
         QString text = thing.name;
         if (!thing.value.isEmpty())

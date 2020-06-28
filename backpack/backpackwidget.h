@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
+#include <QComboBox>
 #include "timelinewidget.h"
 
 class BackpackWidget : public QWidget
@@ -31,8 +32,10 @@ signals:
 public slots:
     void autoRefreshTimeline();
     void refreshTimeline();
+    void refreshThings();
 
 private:
+    QComboBox* bps_combo;
     QListWidget* list_widget;
     QPushButton* refresh_btn;
     TimelineWidget* timeline;
