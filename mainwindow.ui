@@ -16,9 +16,23 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout" stretch="3,1">
     <item>
-     <widget class="TimelineWidget" name="widget" native="true">
-      <layout class="QHBoxLayout" name="horizontalLayout_2"/>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="TimelineWidget" name="widget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>保存</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="BackpackWidget" name="widget_2" native="true"/>

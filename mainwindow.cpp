@@ -11,15 +11,23 @@ MainWindow::MainWindow(QWidget *parent)
     (new TimelineUndoStack(ui->widget));
     ui->widget_2->setTimeline(ui->widget);
 
-    for (int i = 0; i < 20; i++)
+    QString content = FileUtil::readTextFileIfExist("timeline_data.txt");
+    if (!content.isEmpty())
     {
-        QStringList sl;
-        int count = rand() % 8;
-        while (count--)
-            sl << ("文本"+QString::number(rand()%9999999900+100));
-        ui->widget->addItem("2020.3."+QString::number(i), sl);
+        ui->widget->fromString(content);
     }
-    ui->widget->adjustBucketsPositionsWithAnimation();
+    else
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            QStringList sl;
+            int count = rand() % 8;
+            while (count--)
+                sl << ("文本"+QString::number(rand()%9999999900+100));
+            ui->widget->addItem("2020.3."+QString::number(i), sl);
+        }
+        ui->widget->adjustBucketsPositionsWithAnimation();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -27,3 +35,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+
+void MainWindow::on_pushButton_clicked()
+{
+    FileUtil::writeTextFile("timeline_data.txt", ui->widget->toString());
+}

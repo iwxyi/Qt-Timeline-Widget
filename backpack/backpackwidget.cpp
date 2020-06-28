@@ -103,6 +103,8 @@ void BackpackWidget::refreshTimeline()
     QRegularExpression addRe("^(@(.*))?\\+(.+)");
     QRegularExpression delRe("^(@(.*))?-(.+)");
     QRegularExpression modRe("^(@(.*))?\\*(.+?)=(.*)");
+    QRegularExpression modAddRe("^(@(.*))?\\*(.+?)\\+(.*)");
+    QRegularExpression modCutRe("^(@(.*))?\\*(.+?)-(.*)");
     auto getBackpack = [&](QString name) {
         if (!backpacks.contains(name))
             backpacks.insert(name, QList<TimeThing>{});
@@ -123,7 +125,7 @@ void BackpackWidget::refreshTimeline()
             if (text.indexOf(addRe, 0, &match) > -1)
             {
                 auto rsts = match.capturedTexts();
-                QString bp = rsts.at(2); // 背包名字
+                QString bp = rsts.at(2); // 背包名字（可空）
                 QString name = rsts.at(3); // 物品名字
                 TimeThing thing;
                 thing.time_index = watched_indexes.at(i);
@@ -135,7 +137,7 @@ void BackpackWidget::refreshTimeline()
             else if (text.indexOf(delRe, 0, &match) > -1)
             {
                 auto rsts = match.capturedTexts();
-                QString bp = rsts.at(2); // 背包名字
+                QString bp = rsts.at(2); // 背包名字（可空）
                 QString name = rsts.at(3); // 物品名字
                 auto things = getBackpack(bp);
                 for (int j = 0; j < things->size(); j++)

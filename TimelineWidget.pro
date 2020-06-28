@@ -37,6 +37,7 @@ SOURCES += \
 
 HEADERS += \
     backpack/backpackwidget.h \
+    fileutil.h \
     mainwindow.h \
     testlistwidget.h \
     timeline/labeleditor.h \
