@@ -102,11 +102,10 @@ void BackpackWidget::refreshTimeline()
      * @仓库+物品
      * @主角*等级=3
      */
-    QRegularExpression addRe("^(@(.*))?\\+(.+)");
-    QRegularExpression delRe("^(@(.*))?-(.+)");
-    QRegularExpression modRe("^(@(.*))?\\*(.+?)=(.*)");
-    QRegularExpression modAddRe("^(@(.*))?\\*(.+?)\\+(.*)");
-    QRegularExpression modCutRe("^(@(.*))?\\*(.+?)-(.*)");
+    QRegularExpression addDelRe("^(@(.*))?([\\+\\-])(.+)"); // 物品加减
+    QRegularExpression attrRe("^(@(.*))?\\*(.+?)([\\+\\-=])(.*)"); // 属性加减
+    QRegularExpression pureNum("^\\d+$"); // 纯数字
+    QRegularExpression numUnit("^(\\d+)(.+)$"); // 带单位的数字
     auto getBackpack = [&](QString name) {
         if (!backpacks.contains(name))
             backpacks.insert(name, QList<TimeThing>{});
@@ -123,39 +122,76 @@ void BackpackWidget::refreshTimeline()
         foreach (auto text, texts)
         {
             QRegularExpressionMatch match;
-            // +物品
-            if (text.indexOf(addRe, 0, &match) > -1)
+            // @背包+物品  -物品
+            if (text.indexOf(addDelRe, 0, &match) > -1)
             {
                 auto rsts = match.capturedTexts();
                 QString bp = rsts.at(2); // 背包名字（可空）
-                QString name = rsts.at(3); // 物品名字
-                TimeThing thing;
-                thing.time_index = watched_indexes.at(i);
-                thing.name = name;
-                getBackpack(bp)->append(thing);
-            }
-
-            // -物品
-            else if (text.indexOf(delRe, 0, &match) > -1)
-            {
-                auto rsts = match.capturedTexts();
-                QString bp = rsts.at(2); // 背包名字（可空）
-                QString name = rsts.at(3); // 物品名字
-                auto things = getBackpack(bp);
-                for (int j = 0; j < things->size(); j++)
+                QString op = rsts.at(3);
+                QString name = rsts.at(4); // 物品名字
+                if (op == "+") // +物品
                 {
-                    if (things->at(j).name == name)
+                    TimeThing thing;
+                    thing.name = name;
+                    thing.time_index = watched_indexes.at(i);
+                    getBackpack(bp)->append(thing);
+                }
+                else if(op == "-") // -物品
+                {
+                    auto things = getBackpack(bp);
+                    for (int j = 0; j < things->size(); j++)
                     {
-                        things->removeAt(j);
-                        break;
+                        if (things->at(j).name == name)
+                        {
+                            things->removeAt(j);
+                            break;
+                        }
                     }
                 }
             }
 
-            // *物品=属性
+            // @背包*物品=属性    @背包*物品+数值  *物品-数值
+            else if (text.indexOf(attrRe, 0, &match) > -1)
+            {
+                auto rsts = match.capturedTexts();
+                QString bp = rsts.at(2);
+                QString name = rsts.at(3);
+                QString op = rsts.at(4);
+                QString value = rsts.at(5);
+                if (op == "=") // 物品=属性
+                {
+                    auto things = getBackpack(bp);
+                    TimeThing* thing = nullptr;
+                    for (int j = 0; j < things->size(); j++)
+                    {
+                        if (things->at(j).name == name)
+                        {
+                            thing = &(*things)[j];
+                            break;
+                        }
+                    }
+                    if (thing == nullptr) // 不存在这个物品
+                    {
+                        TimeThing newThing;
+                        newThing.name = name;
+                        newThing.value = value;
+                        newThing.time_index = watched_indexes.at(i);
+                        things->append(newThing);
+                    }
+                    else // 存在，更改属性
+                    {
+                        thing->value = value;
+                    }
+                }
+                else if (op == "+") // 物品+数值
+                {
 
-            // *物品+数值  *物品-数值
+                }
+                else if (op == "-") // 物品-数值
+                {
 
+                }
+            }
         }
     }
 
