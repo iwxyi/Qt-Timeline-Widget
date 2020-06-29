@@ -40,7 +40,7 @@ public:
     void setCurrentItem(int row, bool multi = false);
     void setCurrentItem(TimelineBucket* bucket, bool multi = false);
     void scrollTo(int index = -1);
-    QList<int> selectedIndexes() const;
+    QList<int> selectedIndexes(int delta = 0) const;
 
     void resetWidth();
     void adjustBucketsPositions(int start = -1);
@@ -73,6 +73,10 @@ public slots:
     void finishEditing();
 
     void actionAddText();
+    void actionAddTextLeft();
+    void actionAddTextRight();
+    void actionEditTime();
+    void actionEditText(int index);
     void actionAddLine();
     void actionInsertAbove();
     void actionInsertUnder();

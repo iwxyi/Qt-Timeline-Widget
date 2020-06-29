@@ -27,6 +27,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="pushButton">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string>保存</string>
         </property>

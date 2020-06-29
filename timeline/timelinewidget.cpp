@@ -278,13 +278,13 @@ void TimelineWidget::scrollTo(int index)
     }
 }
 
-QList<int> TimelineWidget::selectedIndexes() const
+QList<int> TimelineWidget::selectedIndexes(int delta) const
 {
     int size = buckets.size();
     QList<int> indexes;
     for (int i = 0; i < size; i++)
         if (buckets.at(i)->isSelected())
-            indexes << i;
+            indexes << (i+delta);
     return indexes;
 }
 
@@ -600,8 +600,16 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
         }
         break;
     case Qt::Key_Delete:
+    {
+        int index = current_index;
         actionDeleteLine();
+        // 删除键删除的需要继续保持选中状态
+        if (index > -1 && index < count()) // 聚焦原来的同一个索引
+            setCurrentItem(index);
+        else if (index > 0 && index == count()) // 聚焦最后一个
+            setCurrentItem(index-1);
         return ;
+    }
     case Qt::Key_Insert:
         actionInsertAbove();
         return ;
@@ -644,7 +652,14 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
         actionCopyText();
         return ;
     case Qt::Key_Tab:
-        actionAddText();
+        /**
+         * 注意：如果要监听到 Tab 键，要禁止 Tab 切换
+         * QWidget::setFocus(Qt::NoFocus)
+         */
+        if (modifiers == Qt::NoModifier)
+        {
+            actionAddText();
+        }
         return ;
     case Qt::Key_Enter:
     case Qt::Key_Return:
@@ -655,7 +670,44 @@ void TimelineWidget::keyPressEvent(QKeyEvent *event)
         else if (modifiers == Qt::NoModifier)
             actionInsertUnder();
         return ;
+    case Qt::Key_Space:
+        actionEditText(0);
+        return ;
+    case Qt::Key_1:
+        actionEditText(0);
+        return ;
+    case Qt::Key_2:
+        actionEditText(1);
+        return ;
+    case Qt::Key_3:
+        actionEditText(2);
+        return ;
+    case Qt::Key_4:
+        actionEditText(3);
+        return ;
+    case Qt::Key_5:
+        actionEditText(4);
+        return ;
+    case Qt::Key_6:
+        actionEditText(5);
+        return ;
+    case Qt::Key_7:
+        actionEditText(6);
+        return ;
+    case Qt::Key_8:
+        actionEditText(7);
+        return ;
+    case Qt::Key_9:
+        actionEditText(8);
+        return ;
+    case Qt::Key_0:
+    case Qt::Key_QuoteLeft: // 反撇号
+        actionEditTime();
+        return ;
+    case Qt::Key_Apostrophe: // 这是单引号……
+        break;
     }
+
     QScrollArea::keyPressEvent(event);
 }
 
@@ -886,6 +938,34 @@ void TimelineWidget::actionAddText()
     }
 }
 
+void TimelineWidget::actionAddTextLeft()
+{
+
+}
+
+void TimelineWidget::actionAddTextRight()
+{
+
+}
+
+void TimelineWidget::actionEditTime()
+{
+    if (current_index == -1)
+        return ;
+    auto bucket = at(current_index);
+    slotTimeWidgetDoubleClicked(bucket->timeLabel());
+}
+
+void TimelineWidget::actionEditText(int index)
+{
+    if (current_index == -1)
+        return ;
+    auto bucket = at(current_index);
+    if (bucket->count() <= index)
+        return ;
+    slotTextWidgetDoubleClicked(bucket->at(index));
+}
+
 void TimelineWidget::actionAddLine()
 {
     timeline_undos->addCommand(count());
@@ -912,7 +992,7 @@ void TimelineWidget::actionInsertAbove()
 
 void TimelineWidget::actionInsertUnder()
 {
-    QList<int> indexes = selectedIndexes();
+    QList<int> indexes = selectedIndexes(1);
 
     timeline_undos->addCommand(indexes);
 

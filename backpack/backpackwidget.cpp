@@ -25,6 +25,10 @@ void BackpackWidget::initView()
     layout->addWidget(refresh_btn);
     setLayout(layout);
 
+    bps_combo->setFocusPolicy(Qt::NoFocus);
+    list_widget->setFocusPolicy(Qt::NoFocus);
+    refresh_btn->setFocusPolicy(Qt::NoFocus);
+
     /*connect(bps_combo, &QComboBox::currentTextChanged, this, [=](QString name){
         if (bps_combo->count() == 0)
             return ;
