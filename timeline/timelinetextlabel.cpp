@@ -127,17 +127,24 @@ void TimelineTextLabel::mouseMoveEvent(QMouseEvent *event)
     QLabel::mouseMoveEvent(event);
 }
 
-void TimelineTextLabel::slotMenuShowed(const QPoint &pos)
+void TimelineTextLabel::slotMenuShowed(const QPoint &)
 {
     QMenu* menu = new QMenu("菜单", this);
     QAction* insert_left_action = new QAction("左边插入文字节点", this);
     QAction* insert_right_action = new QAction("右边插入文字节点", this);
     QAction* delete_action = new QAction("删除节点", this);
     QAction* copy_text_action = new QAction("复制节点文字", this);
+    QAction* paste_text_action = new QAction("粘贴文字", this);
     menu->addAction(insert_left_action);
     menu->addAction(insert_right_action);
     menu->addAction(delete_action);
+    menu->addSeparator();
     menu->addAction(copy_text_action);
+    menu->addAction(paste_text_action);
+
+    QClipboard* clip = QApplication::clipboard();
+    if (!clip->mimeData()->hasText() || clip->mimeData()->text().contains("\n"))
+        paste_text_action->setEnabled(false);
 
     connect(insert_left_action, &QAction::triggered, this, [=] {
         emit signalInsertLeft();
@@ -148,9 +155,14 @@ void TimelineTextLabel::slotMenuShowed(const QPoint &pos)
     connect(delete_action, &QAction::triggered, this, [=] {
         emit signalDelete();
     });
-    connect(insert_left_action, &QAction::triggered, this, [=] {
+    connect(copy_text_action, &QAction::triggered, this, [=] {
         QClipboard* clip = QApplication::clipboard();
         clip->setText(text());
+    });
+    connect(paste_text_action, &QAction::triggered, this, [=] {
+        QClipboard* clip = QApplication::clipboard();
+        QString text = clip->mimeData()->text();
+        timeline_undos->modifyCommand((TimelineBucket*)(parentWidget()), this, this->text(), text);
     });
 
     menu->exec(QCursor::pos());

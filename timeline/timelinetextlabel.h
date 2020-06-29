@@ -18,6 +18,8 @@
 
 #define TIMELINE_TEXT_MIME_KEY "TIMELINE_TEXT_WIDGET"
 
+class TimelineBucket;
+
 class TimelineTextLabel : public QLabel
 {
     Q_OBJECT
@@ -47,7 +49,7 @@ signals:
     void signalSizeChanged(QSize size);
 
 public slots:
-    void slotMenuShowed(const QPoint &pos);
+    void slotMenuShowed(const QPoint &);
 
 private:
     QPoint press_pos;
