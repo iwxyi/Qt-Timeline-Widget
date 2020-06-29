@@ -218,6 +218,20 @@ void TimelineWidget::selectItem(TimelineBucket *bucket)
     emit selectedItemsChanged();
 }
 
+void TimelineWidget::selectItems(QList<int> rows, bool clearBefore)
+{
+    if (clearBefore)
+        unselectAll();
+    foreach (auto row, rows)
+    {
+        auto bucket = buckets.at(row);
+        bucket->setSelected(true);
+        if (!selected_buckets.contains(bucket))
+            selected_buckets.append(bucket);
+    }
+    emit selectedItemsChanged();
+}
+
 void TimelineWidget::unselectItem(TimelineBucket *bucket)
 {
     bucket->setSelected(false);

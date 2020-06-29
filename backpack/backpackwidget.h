@@ -18,7 +18,7 @@ public:
     struct TimeThing {
         QString name;   // 物品的名字
         QString value;  // 物品的值（只有可修改项才有）
-        int time_index; // 对应时间轴的下标
+        QList<int> indexes; // 对应时间轴的下标
     };
 
 private:

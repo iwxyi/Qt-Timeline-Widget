@@ -35,6 +35,7 @@ public:
     void selectAll();
     void unselectAll();
     void selectItem(TimelineBucket* bucket);
+    void selectItems(QList<int> rows, bool clearBefore = true);
     void unselectItem(TimelineBucket* bucket);
     void setCurrentItem(int row, bool multi = false);
     void setCurrentItem(TimelineBucket* bucket, bool multi = false);

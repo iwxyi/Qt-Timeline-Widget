@@ -34,9 +34,9 @@ void BackpackWidget::initView()
     connect(bps_combo, SIGNAL(activated(const QString&)), this, SLOT(slotComboChanged(const QString&)));
     connect(list_widget, &QListWidget::itemActivated, this, [=](QListWidgetItem *item){
         int row = list_widget->row(item);
-        int index = backpacks.value(current_backpack).at(row).time_index;
+        auto indexes = backpacks.value(current_backpack).at(row).indexes;
         is_focusing_item = true;
-        timeline->setCurrentItem(index);
+        timeline->selectItems(indexes);
         is_focusing_item = false;
     });
     connect(refresh_btn, SIGNAL(clicked()), this, SLOT(refreshTimeline()));
@@ -132,7 +132,7 @@ void BackpackWidget::refreshTimeline()
                 {
                     TimeThing thing;
                     thing.name = name;
-                    thing.time_index = watched_indexes.at(i);
+                    thing.indexes << watched_indexes.at(i);
                     getBackpack(bp)->append(thing);
                 }
                 else if(op == "-") // -物品
@@ -173,10 +173,10 @@ void BackpackWidget::refreshTimeline()
                 {
                     TimeThing newThing;
                     newThing.name = name;
-                    newThing.time_index = watched_indexes.at(i);
                     things->append(newThing);
                     thing = &(*things)[things->size()-1];
                 }
+                thing->indexes << watched_indexes.at(i);
 
                 // 修改属性
                 if (op == "=" || (thing->value.isEmpty() && op == "+")) // （空）物品=属性
@@ -206,8 +206,8 @@ void BackpackWidget::refreshTimeline()
                     if (num2.isEmpty())
                         continue;
 
-                    int iNum = num.toLongLong();
-                    int iNum2 = num2.toLongLong();
+                    qint64 iNum = num.toLongLong();
+                    qint64 iNum2 = num2.toLongLong();
 
                     // 要确保单位一样
                     if (unit != unit2)
