@@ -104,8 +104,7 @@ void BackpackWidget::refreshTimeline()
      */
     QRegularExpression addDelRe("^(@(.*))?([\\+\\-])(.+)"); // 物品加减
     QRegularExpression attrRe("^(@(.*))?\\*(.+?)([\\+\\-=])(.*)"); // 属性加减
-    QRegularExpression pureNum("^\\d+$"); // 纯数字
-    QRegularExpression numUnit("^(\\d+)(.+)$"); // 带单位的数字
+    QRegularExpression numUnitRe("^(-?\\d{1,8})\\s?(.*)$"); // 带单位的数字
     auto getBackpack = [&](QString name) {
         if (!backpacks.contains(name))
             backpacks.insert(name, QList<TimeThing>{});
@@ -158,38 +157,102 @@ void BackpackWidget::refreshTimeline()
                 QString name = rsts.at(3);
                 QString op = rsts.at(4);
                 QString value = rsts.at(5);
-                if (op == "=") // 物品=属性
+
+                // 查找或创建
+                auto things = getBackpack(bp);
+                TimeThing* thing = nullptr;
+                for (int j = 0; j < things->size(); j++)
                 {
-                    auto things = getBackpack(bp);
-                    TimeThing* thing = nullptr;
-                    for (int j = 0; j < things->size(); j++)
+                    if (things->at(j).name == name)
                     {
-                        if (things->at(j).name == name)
+                        thing = &(*things)[j];
+                        break;
+                    }
+                }
+                if (thing == nullptr) // 不存在这个物品，创建
+                {
+                    TimeThing newThing;
+                    newThing.name = name;
+                    newThing.time_index = watched_indexes.at(i);
+                    things->append(newThing);
+                    thing = &(*things)[things->size()-1];
+                }
+
+                // 修改属性
+                if (op == "=" || (thing->value.isEmpty() && op == "+")) // （空）物品=属性
+                {
+                    thing->value = value;
+                }
+                else if (thing->value.isEmpty() && op == "-") // 空物品，负数
+                {
+                    thing->value = "-" + value;
+                }
+                else if (op == "+" || op == "-")
+                {
+                    QRegularExpressionMatch match2;
+                    if (thing->value.indexOf(numUnitRe, 0, &match2) == -1)
+                        continue;
+                    auto texts = match2.capturedTexts();
+                    QString num = texts.at(1);  // 数值
+                    QString unit = texts.at(2); // 单位
+                    if (num.isEmpty())
+                        num = "0";
+
+                    if (value.indexOf(numUnitRe, 0, &match2) == -1)
+                        continue;
+                    texts = match2.capturedTexts();
+                    QString num2 = texts.at(1);  // 数值
+                    QString unit2 = texts.at(2); // 单位
+                    if (num2.isEmpty())
+                        continue;
+
+                    int iNum = num.toLongLong();
+                    int iNum2 = num2.toLongLong();
+
+                    // 要确保单位一样
+                    if (unit != unit2)
+                    {
+                        if (unit2.endsWith(unit))
                         {
-                            thing = &(*things)[j];
-                            break;
+                            while (!unit2.isEmpty())
+                            {
+                                QString ch = unit2.mid(0, 1);
+                                if (ch == "十")
+                                    iNum2 *= 10;
+                                else if (ch == "百")
+                                    iNum2 *= 100;
+                                else if (ch == "千")
+                                    iNum2 *= 1000;
+                                else if (ch == "万")
+                                    iNum2 *= 10000;
+                                else if (ch == "亿")
+                                    iNum2 *= 100000000;
+                                else if (ch == "兆")
+                                    iNum2 *= 10000000000;
+                                else
+                                    break;
+                                unit2 = unit2.right(unit2.length()-1);
+                                if (unit2 == unit) // 已经转换完成
+                                    break;
+                            }
+                            if (unit2 != unit && !unit2.isEmpty()) // 未知转换
+                                continue;
                         }
+                        else if (!unit.isEmpty() && unit2.isEmpty())
+                            unit2 = unit; // 默认单位
+                        else // 无法转换
+                            continue;
                     }
-                    if (thing == nullptr) // 不存在这个物品
-                    {
-                        TimeThing newThing;
-                        newThing.name = name;
-                        newThing.value = value;
-                        newThing.time_index = watched_indexes.at(i);
-                        things->append(newThing);
-                    }
-                    else // 存在，更改属性
-                    {
-                        thing->value = value;
-                    }
-                }
-                else if (op == "+") // 物品+数值
-                {
 
-                }
-                else if (op == "-") // 物品-数值
-                {
-
+                    if (op == "+") // 物品+数值
+                    {
+                        iNum += iNum2;
+                    }
+                    else if (op == "-") // 物品-数值
+                    {
+                        iNum -= iNum2;
+                    }
+                    thing->value = QString("%1%2").arg(iNum).arg(unit);
                 }
             }
         }
