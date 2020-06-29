@@ -19,17 +19,19 @@ void BackpackWidget::initView()
     refresh_btn = new QPushButton("刷新", this);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setMargin(0);
     layout->addWidget(bps_combo);
     layout->addWidget(list_widget);
     layout->addWidget(refresh_btn);
     setLayout(layout);
 
-    connect(bps_combo, &QComboBox::currentTextChanged, this, [=](QString name){
+    /*connect(bps_combo, &QComboBox::currentTextChanged, this, [=](QString name){
         if (bps_combo->count() == 0)
             return ;
         current_backpack = name;
         refreshThings();
-    });
+    });*/
+    connect(bps_combo, SIGNAL(activated(const QString&)), this, SLOT(slotComboChanged(const QString&)));
     connect(list_widget, &QListWidget::itemActivated, this, [=](QListWidgetItem *item){
         int row = list_widget->row(item);
         int index = backpacks.value(current_backpack).at(row).time_index;
@@ -159,8 +161,12 @@ void BackpackWidget::refreshTimeline()
 
     // ==== 内容显示至视图 ====
     bps_combo->clear();
-    bps_combo->addItems(backpacks.keys());
-    bps_combo->setCurrentText(current_backpack);
+    bps_combo->addItems(backpacks.keys()); // 会触发currentChanged信号
+    if (backpacks.contains(current_backpack))
+        bps_combo->setCurrentText(current_backpack);
+    else
+        bps_combo->setCurrentText(current_backpack = "");
+    refreshThings();
 
     /*QString max_name = "";
     int max_count = 0;
@@ -184,6 +190,14 @@ void BackpackWidget::refreshThings()
         QString text = thing.name;
         if (!thing.value.isEmpty())
             text += "：" + thing.value;
-        QListWidgetItem* item = new QListWidgetItem(text, list_widget);
+        new QListWidgetItem(text, list_widget);
     }
+}
+
+void BackpackWidget::slotComboChanged(const QString &name)
+{
+    if (bps_combo->count() == 0)
+        return ;
+    current_backpack = name;
+    refreshThings();
 }

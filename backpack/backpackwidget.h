@@ -33,6 +33,7 @@ public slots:
     void autoRefreshTimeline();
     void refreshTimeline();
     void refreshThings();
+    void slotComboChanged(const QString& name);
 
 private:
     QComboBox* bps_combo;
