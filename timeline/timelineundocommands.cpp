@@ -75,13 +75,13 @@ void TimelineBucketAddCommand::redo()
 TimelineBucketTextAddCommand::TimelineBucketTextAddCommand(TimelineWidget *widget, int bucket_index, int index, QUndoCommand *parent)
     : TimelineBucketTextAddCommand(widget, bucket_index, QList<int>{index}, parent)
 {
-    setText("添加文字");
+
 }
 
 TimelineBucketTextAddCommand::TimelineBucketTextAddCommand(TimelineWidget *widget, int bucket_index, QList<int> indexes, QUndoCommand *parent)
     : QUndoCommand(parent), widget(widget), bucket_index(bucket_index), indexes(indexes)
 {
-
+    setText("添加文字");
 }
 
 void TimelineBucketTextAddCommand::undo()
@@ -105,6 +105,63 @@ void TimelineBucketTextAddCommand::redo()
     bucket->adjustWidgetsPositionsWithAnimation(indexes.first());
     bucket->adjustBucketSize();
 }
+
+TimelineBucketTextsAddCommand::TimelineBucketTextsAddCommand(TimelineWidget *widget, int bucket_index, int text_index, QUndoCommand *parent)
+    : TimelineBucketTextsAddCommand(widget, QList<int>{bucket_index}, QList<int>{text_index}, parent)
+{
+
+}
+
+TimelineBucketTextsAddCommand::TimelineBucketTextsAddCommand(TimelineWidget *widget, QList<int> bucket_indexes, QList<int> text_indexes, QUndoCommand *parent)
+    : TimelineBucketTextsAddCommand(widget, bucket_indexes, intRow2Col(text_indexes), parent)
+{
+
+}
+
+TimelineBucketTextsAddCommand::TimelineBucketTextsAddCommand(TimelineWidget *widget, QList<int> bucket_indexes, QList<QList<int> > texts_indexes, QUndoCommand *parent)
+    : QUndoCommand(parent), widget(widget), bucket_indexes(bucket_indexes), texts_indexes(texts_indexes)
+{
+    setText("插入文字节点");
+}
+
+void TimelineBucketTextsAddCommand::undo()
+{
+    for (int i = 0; i < bucket_indexes.size(); i++) // 每一个bucket
+    {
+        auto bucket = widget->at(bucket_indexes.at(i));
+        auto indexes = texts_indexes.at(i);
+        for (int j = indexes.size()-1; j >= 0; j--) // 每一个 TextLabel
+        {
+            bucket->removeAt(indexes.at(j));
+        }
+        bucket->adjustWidgetsPositionsWithAnimation(indexes.first());
+    }
+}
+
+void TimelineBucketTextsAddCommand::redo()
+{
+    for (int i = 0; i < bucket_indexes.size(); i++) // 每一个bucket
+    {
+        auto bucket = widget->at(bucket_indexes.at(i));
+        auto indexes = texts_indexes.at(i);
+        for (int j = indexes.size()-1; j >= 0; j--) // 每一个 TextLabel
+        {
+            bucket->insertTextWidget("", indexes.at(j));
+        }
+        bucket->adjustWidgetsPositionsWithAnimation(indexes.first());
+    }
+}
+
+QList<QList<int> > TimelineBucketTextsAddCommand::intRow2Col(QList<int> row)
+{
+    QList<QList<int>> cols;
+    foreach (auto i, row)
+    {
+        cols << QList<int>{i};
+    }
+    return cols;
+}
+
 
 QStringList TimelineBucketAddCommand::numStringList(int number)
 {

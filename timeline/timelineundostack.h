@@ -17,6 +17,8 @@ public:
     virtual void addCommand(QList<int> indexes, QStringList times, QList<QStringList> texts) override;
     virtual void addCommand(TimelineBucket* bucket, int index) override;
     virtual void addCommand(TimelineBucket* bucket, QList<int> indexes) override;
+    virtual void addCommand(QList<int> bucket_indexes, QList<int> text_indexes) override;
+    virtual void addCommand(QList<int> bucket_indexes, QList<QList<int>> texts_indexes) override;
     virtual void deleteCommand(int index) override;
     virtual void deleteCommand(QList<int> indexes) override;
     virtual void deleteCommand(TimelineBucket* bucket, int index) override;

@@ -20,6 +20,8 @@ public:
     virtual void addCommand(QList<int> indexes, QStringList times, QList<QStringList> texts) = 0;
     virtual void addCommand(TimelineBucket* bucket, int index) = 0;
     virtual void addCommand(TimelineBucket* bucket, QList<int> indexes) = 0;
+    virtual void addCommand(QList<int> bucket_indexes, QList<int> text_indexes) = 0;
+    virtual void addCommand(QList<int> bucket_indexes, QList<QList<int>> texts_indexes) = 0;
     virtual void deleteCommand(int index) = 0;
     virtual void deleteCommand(QList<int> indexes) = 0;
     virtual void deleteCommand(TimelineBucket* bucket, int index) = 0;

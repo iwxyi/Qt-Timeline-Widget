@@ -46,6 +46,25 @@ private:
     QList<int> indexes; // 请确保先从小到大排好序
 };
 
+class TimelineBucketTextsAddCommand : public QUndoCommand
+{
+public:
+    TimelineBucketTextsAddCommand(TimelineWidget* widget, int bucket_index, int text_index, QUndoCommand *parent = nullptr);
+    TimelineBucketTextsAddCommand(TimelineWidget* widget, QList<int> bucket_indexes, QList<int>text_indexes, QUndoCommand* parent = nullptr);
+    TimelineBucketTextsAddCommand(TimelineWidget* widget, QList<int> bucket_indexes, QList<QList<int>>texts_indexes, QUndoCommand* parent = nullptr);
+
+    void undo() override;
+    void redo() override;
+
+private:
+    static QList<QList<int>> intRow2Col(QList<int> row);
+
+private:
+    TimelineWidget* widget;
+    QList<int> bucket_indexes; // 请确保从小到大排好序
+    QList<QList<int>> texts_indexes; // 请确保从小到大排好序
+};
+
 
 class TimelineBucketDeleteCommand : public QUndoCommand
 {

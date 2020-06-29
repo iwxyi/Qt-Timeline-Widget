@@ -917,23 +917,20 @@ void TimelineWidget::finishEditing()
 
 void TimelineWidget::actionAddText()
 {
-    int count = 0, first = -1;
-    for (int i = 0; i < buckets.size(); i++)
+    QList<int> bucket_indexes = selectedIndexes();
+    QList<QList<int>> texts_indexes;
+    foreach (auto bucket_index, bucket_indexes)
     {
-        auto bucket = buckets.at(i);
-        if (bucket->isSelected())
-        {
-            bucket->insertText(-1, "");
-            count++;
-            if (first == -1)
-                first = i;
-        }
+        texts_indexes << QList<int>{buckets.at(bucket_index)->count()};
     }
-    if (count == 1 && first > -1)
+
+    timeline_undos->addCommand(bucket_indexes, texts_indexes);
+
+    if (bucket_indexes.size() == 1)
     {
         // 等待动画结束，显示编辑框
         QTimer::singleShot(300, [=]{
-            slotEdit(first, buckets.at(first)->count());
+            slotEdit(bucket_indexes.first(), buckets.at(bucket_indexes.first())->count());
         });
     }
 }

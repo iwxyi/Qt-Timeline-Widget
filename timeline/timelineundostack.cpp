@@ -35,6 +35,16 @@ void TimelineUndoStack::addCommand(TimelineBucket *bucket, QList<int> indexes)
     push(new TimelineBucketTextAddCommand(widget, widget->indexOf(bucket), indexes));
 }
 
+void TimelineUndoStack::addCommand(QList<int> bucket_indexes, QList<int> text_indexes)
+{
+    push(new TimelineBucketTextsAddCommand(widget, bucket_indexes, text_indexes));
+}
+
+void TimelineUndoStack::addCommand(QList<int> bucket_indexes, QList<QList<int> > texts_indexes)
+{
+    push(new TimelineBucketTextsAddCommand(widget, bucket_indexes, texts_indexes));
+}
+
 void TimelineUndoStack::deleteCommand(int index)
 {
     push(new TimelineBucketDeleteCommand(widget, index));
