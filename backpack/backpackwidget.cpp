@@ -9,7 +9,7 @@ void BackpackWidget::setTimeline(TimelineWidget *timeline)
 {
     this->timeline = timeline;
 
-    connect(timeline, SIGNAL(selectedItemsChanged()), this, SLOT(autoRefreshTimeline()));
+    connect(timeline, SIGNAL(targetItemsChanged()), this, SLOT(autoRefreshTimeline()));
 }
 
 void BackpackWidget::initView()

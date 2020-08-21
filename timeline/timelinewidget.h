@@ -57,7 +57,7 @@ private:
 
 signals:
     void manualSelected(); // 鼠标/键盘事件
-    void selectedItemsChanged();
+    void targetItemsChanged(); // 选中项改变，或者选中的内容改变了
 
 public slots:
     void updateUI();

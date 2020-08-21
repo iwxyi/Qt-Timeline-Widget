@@ -50,10 +50,12 @@ TimelineWidget::TimelineWidget(QWidget *parent) : QScrollArea(parent)
             if (editing_bucket->indexOf(static_cast<TimelineTextLabel*>(editing_label)) >= 0)
             {
                 timeline_undos->modifyCommand(editing_bucket, static_cast<TimelineTextLabel*>(editing_label), orig, text);
+                emit targetItemsChanged();
             }
             else
             {
                 timeline_undos->modifyCommand(editing_bucket, orig, text);
+                emit targetItemsChanged();
             }
         }
         edit->hide();
@@ -200,6 +202,7 @@ void TimelineWidget::selectAll()
         bucket->setSelected(true);
     }
     selected_buckets = buckets;
+    emit targetItemsChanged();
 }
 
 void TimelineWidget::unselectAll()
@@ -208,6 +211,7 @@ void TimelineWidget::unselectAll()
         bucket->setSelected(false);
     }
     selected_buckets.clear();
+    emit targetItemsChanged();
 }
 
 void TimelineWidget::selectItem(TimelineBucket *bucket)
@@ -215,7 +219,7 @@ void TimelineWidget::selectItem(TimelineBucket *bucket)
     bucket->setSelected(true);
     if (!selected_buckets.contains(bucket))
         selected_buckets.append(bucket);
-    emit selectedItemsChanged();
+    emit targetItemsChanged();
 }
 
 void TimelineWidget::selectItems(QList<int> rows, bool clearBefore)
@@ -229,14 +233,14 @@ void TimelineWidget::selectItems(QList<int> rows, bool clearBefore)
         if (!selected_buckets.contains(bucket))
             selected_buckets.append(bucket);
     }
-    emit selectedItemsChanged();
+    emit targetItemsChanged();
 }
 
 void TimelineWidget::unselectItem(TimelineBucket *bucket)
 {
     bucket->setSelected(false);
     selected_buckets.removeOne(bucket);
-    emit selectedItemsChanged();
+    emit targetItemsChanged();
 }
 
 void TimelineWidget::setCurrentItem(int row, bool multi)
@@ -716,6 +720,7 @@ TimelineBucket *TimelineWidget::createItemWidget(QString time, QStringList texts
     TimelineBucket* bucket = new TimelineBucket(center_widget);
     bucket->setTime(time);
     bucket->setText(texts);
+    connect(bucket, SIGNAL(signalBucketContentsChanged()), this, SIGNAL(targetItemsChanged()));
     return bucket;
 }
 

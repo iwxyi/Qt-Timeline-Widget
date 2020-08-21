@@ -223,6 +223,7 @@ void TimelineBucket::actionInsertLeft(TimelineTextLabel *label)
         return ;
 
     timeline_undos->addCommand(this, index);
+    emit signalBucketContentsChanged();
 }
 
 void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
@@ -232,6 +233,7 @@ void TimelineBucket::actionInsertRight(TimelineTextLabel *label)
         return ;
 
     timeline_undos->addCommand(this, index+1);
+    emit signalBucketContentsChanged();
 }
 
 void TimelineBucket::actionDelete(TimelineTextLabel *label)
@@ -241,6 +243,7 @@ void TimelineBucket::actionDelete(TimelineTextLabel *label)
         return ;
 
     timeline_undos->deleteCommand(this, index);
+    emit signalBucketContentsChanged();
 }
 
 void TimelineBucket::actionMoveTextLabel(int from, int to)
@@ -659,6 +662,7 @@ void TimelineBucket::dropEvent(QDropEvent *event)
                 timeline_undos->moveCommand(this, from_index, to_index);
             }
 
+            emit signalBucketContentsChanged();
             repaint();
         }
     }

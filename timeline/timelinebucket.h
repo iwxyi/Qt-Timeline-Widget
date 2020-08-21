@@ -88,6 +88,7 @@ signals:
     void signalTimeWidgetDoubleClicked(TimelineTimeLabel* label);
     void signalTextWidgetDoubleClicked(TimelineTextLabel* label);
     void signalDroppedAndMoved(TimelineBucket* bucket); // 被拖拽到外面去，从现在这里删掉
+    void signalBucketContentsChanged();
 
 public slots:
     void actionInsertLeft(TimelineTextLabel* label);
